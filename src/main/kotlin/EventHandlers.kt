@@ -46,6 +46,10 @@ suspend fun ReadyEvent.handleReadyEvent() {
         "invite",
         "Displays an invite link for this bot"
     )
+    addCommand(
+        "help",
+        "Alias for /rules"
+    )
 
     isReady = true
 }
@@ -86,7 +90,8 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
         commandIds[0] -> showCommand()
         commandIds[1] -> newGameCommand()
         commandIds[2] -> setPinsCommand()
-        commandIds[3] -> rulesCommand()
+        commandIds[3],
+        commandIds[6] -> rulesCommand()
         commandIds[4] -> allowMultiplesCommand()
         commandIds[5] -> inviteCommand()
     }
