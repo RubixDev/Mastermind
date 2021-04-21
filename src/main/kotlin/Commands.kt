@@ -131,3 +131,16 @@ suspend fun InteractionCreateEvent.allowMultiplesCommand() {
     }
     logger.info("User ${interaction.user.asUser().username} set allowMultiples to $allow")
 }
+
+@KordPreview
+suspend fun InteractionCreateEvent.inviteCommand() {
+    interaction.respondPublic {
+        embed {
+            title = "Invite me using this link:"
+            description = "https://discord.com/api/oauth2/authorize?client_id=830490572765790220&permissions=10304" +
+                    "&scope=bot%20applications.commands"
+            color = Constants.successColor
+            rubixFooter()
+        }
+    }
+}

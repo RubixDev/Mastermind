@@ -42,6 +42,10 @@ suspend fun ReadyEvent.handleReadyEvent() {
             required = true
         }
     }
+    addCommand(
+        "invite",
+        "Displays an invite link for this bot"
+    )
 
     isReady = true
 }
@@ -84,6 +88,7 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
         commandIds[2] -> setPinsCommand()
         commandIds[3] -> rulesCommand()
         commandIds[4] -> allowMultiplesCommand()
+        commandIds[5] -> inviteCommand()
     }
 }
 
