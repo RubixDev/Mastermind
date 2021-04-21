@@ -1,0 +1,175 @@
+import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.Snowflake
+import dev.kord.core.Kord
+import dev.kord.core.behavior.edit
+import dev.kord.core.behavior.interaction.PublicInteractionResponseBehavior
+import dev.kord.core.behavior.interaction.followUp
+import dev.kord.core.entity.Guild
+import dev.kord.core.entity.Message
+import dev.kord.core.entity.User
+import dev.kord.core.entity.channel.MessageChannel
+import dev.kord.core.entity.interaction.GlobalApplicationCommand
+import dev.kord.core.entity.interaction.GuildApplicationCommand
+import dev.kord.core.event.gateway.ReadyEvent
+import dev.kord.rest.builder.interaction.ApplicationCommandCreateBuilder
+import dev.kord.rest.builder.message.EmbedBuilder
+import dev.kord.x.emoji.addReaction
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.toList
+import kotlinx.serialization.encodeToString
+import java.io.File
+
+private operator fun String.times(n: Int): String {
+    var out = ""
+    for (i in 0 until n) {
+        out += this
+    }
+    return out
+}
+
+fun <T> Iterable<T>.countIndexed(predicate: (index: Int, T) -> Boolean): Int {
+    return this.filterIndexed(predicate).size
+}
+
+@KordPreview
+suspend fun ReadyEvent.addCommand(
+    name: String,
+    description: String,
+    builder: ApplicationCommandCreateBuilder.() -> Unit = {}
+): GlobalApplicationCommand {
+    val cmd = kord.createGlobalApplicationCommand(
+        name,
+        description,
+        builder
+    )
+    commandIds.add(cmd.id)
+    return cmd
+}
+
+fun randomBoard(pins: Int = 4, allowMultiples: Boolean = true): Board {
+    if (allowMultiples) {
+        return Board(
+            false,
+            (1..pins).map { (0 until ((pins - 1) * 2)).random() },
+            mutableListOf()
+        )
+    } else {
+        val solution = mutableListOf<Int>()
+        for (pin in 1..pins) {
+            var randomPin = (0 until ((pins - 1) * 2)).random()
+            while (randomPin in solution) {
+                randomPin = (0 until ((pins - 1) * 2)).random()
+            }
+            solution.add(randomPin)
+        }
+        return Board(
+            false,
+            solution,
+            mutableListOf()
+        )
+    }
+}
+
+fun getOrCreateUser(id: Long): BotUser {
+    return userData.find { it.id == id }
+        ?: BotUser(id, 0, 4, true, mutableListOf(), randomBoard())
+            .also { userData.add(it) }
+}
+
+fun saveUserData() {
+    File("userData.json")
+        .also { it.createNewFile() }
+        .writeText(json.encodeToString(userData))
+}
+
+fun EmbedBuilder.rubixFooter() = footer {
+    text = "Bot made by ${Constants.botAuthor.displayName}"
+    icon = Constants.botAuthor.avatar
+}
+
+suspend fun updatePresence(kord: Kord) {
+    kord.editPresence {
+        playing("Mastermind on ${kord.guilds.count()} servers")
+    }
+}
+
+suspend fun updateMessage(message: Message, botUser: BotUser, overrideDesc: String? = null) {
+    message.edit {
+        embed {
+            val prevEmbed = message.embeds[0]
+            title = prevEmbed.title
+            description = overrideDesc
+                ?: prevEmbed.description?.replaceBefore(
+                    "\n",
+                    "_${botUser.nextMove.map { Constants.pinEmojis[it] }.joinToString("")} _"
+                )
+            color = prevEmbed.color
+            footer {
+                text = prevEmbed.footer?.text ?: "Bot made by ${Constants.botAuthor.displayName}"
+                icon = prevEmbed.footer?.iconUrl ?: Constants.botAuthor.avatar
+            }
+        }
+    }
+}
+
+suspend fun displayGuilds(kord: Kord): String {
+    return kord.guilds.toList().joinToString("\n        ", "\n        ") {
+        "${it.name} --> ${it.id.value}"
+    }
+}
+
+@KordPreview
+suspend fun showBoard(
+    author: User,
+    guild: Guild?,
+    channel: MessageChannel,
+    responseBehavior: PublicInteractionResponseBehavior?
+) {
+    val authorId = author.id.value
+    val botUser = getOrCreateUser(authorId)
+    if (botUser.board.isFinished || botUser.board.solution.size != botUser.pins) {
+        botUser.board = randomBoard(botUser.pins, botUser.allowMultiples)
+    }
+
+    var boardDisplay = ""
+    for (row in botUser.board.rows.reversed()) {
+        boardDisplay += "${
+            row.gamePins.map { Constants.pinEmojis[it] }.joinToString("")
+        }   ${
+            Emojis.black.unicode * row.answerPins.black
+        }${
+            Emojis.white.unicode * row.answerPins.white
+        }\n"
+    }
+
+    val displayName = guild?.getMember(Snowflake(authorId))?.nickname ?: author.username
+    val desc = "_${botUser.nextMove.map { Constants.pinEmojis[it] }.joinToString("")} _\n$boardDisplay\n" +
+            "Input your move using the reactions below, delete the last pin " +
+            "using ${Emojis.back} and submit with ${Emojis.check}"
+
+    if (responseBehavior != null) {
+        val botMsg = responseBehavior.followUp {
+            embed {
+                title = "Current board of $displayName"
+                description = desc
+                color = Constants.themeColor
+                rubixFooter()
+            }
+        }.message
+
+        for (pinColor in Constants.pinEmojis.subList(0, (botUser.pins - 1) * 2)) {
+            botMsg.addReaction(pinColor)
+        }
+        botMsg.addReaction(Emojis.back)
+        botMsg.addReaction(Emojis.check)
+
+        botUser.activeMessageId = botMsg.id.value
+        logger.info("Displayed board for ${author.username}")
+    } else {
+        val botMsg = channel.getMessage(Snowflake(botUser.activeMessageId))
+        updateMessage(botMsg, botUser, desc)
+        logger.info("Updated Message for ${author.username}")
+    }
+
+    saveUserData()
+}

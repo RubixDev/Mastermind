@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration level="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%highlight{[ %-12d{HH:mm:ss.SSS} ] (%-5level) [%c{1.}]:  %m%n}{FATAL=bg_red black, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=blue}"
+                    disableAnsi="false"/>
+        </Console>
+        <File name="LogFile" fileName="mastermind.log" immediateFlush="false" append="false">
+            <PatternLayout pattern="[ %-23d{dd-MM-yyyy HH:mm:ss.SSS} ] (%-5level) [%c]:  %m%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="LogFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
