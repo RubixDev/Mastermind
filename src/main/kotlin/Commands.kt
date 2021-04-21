@@ -97,10 +97,12 @@ suspend fun InteractionCreateEvent.rulesCommand() {
                         "- `/newgame` Starts a new game, cancelling the current one, " +
                         "if there is one.\n" +
                         "- `/rules` Shows this message.\n" +
+                        "- `/help` Alias for `/rules`\n" +
                         "- `/setpins <amount>` Sets the number of pins the game is played with. " +
                         "Is 4 by default and must be between 3 and 6.\n" +
                         "- `/allowmultiples <allow>` Allows or prevents multiple pins of the same color to exist in " +
-                        "the solutions. Is on by default."
+                        "the solutions. Is on by default.\n" +
+                        "- `/invite` Displays an invite link for this bot"
             }
             field {
                 name = "Important"
