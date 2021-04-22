@@ -2,9 +2,10 @@
 A Discord bot for the puzzle game 'Mastermind' from 1972
 
 ## Links
-- Invite Bot: [https://discord.ly/mastermind](https://discord.com/api/oauth2/authorize?client_id=830490572765790220&permissions=10304&scope=bot%20applications.commands)
-- TopGG: https://top.gg/bot/830490572765790220
-- Discord Bot List: https://discordbotlist.com/bots/mastermind
+- [Invite Bot](https://discord.com/api/oauth2/authorize?client_id=830490572765790220&permissions=10304&scope=bot%20applications.commands)
+- [top.gg](https://top.gg/bot/830490572765790220)
+- [discordbotlist.com](https://discordbotlist.com/bots/mastermind)
+- [discord.bots.gg](https://discord.bots.gg/bots/830490572765790220)
 
 ## Basic Rules
 Mastermind originally is a bord game from 1972. One player (in this case the bot) thinks of a random combination of four pins. The other player then has to find that solution by placing their guess in the first row of the open field. When he is done the bot places black pins ⭕ and white pins ⚪ next to the row. Each black pin stands for one pin with the correct color and the correct spot. The player just isn't told which ones. White pins stand for pins that have the correct color, but are in the wrong spot.
