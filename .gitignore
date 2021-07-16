@@ -18,5 +18,6 @@ gradle-app.setting
 
 video/
 src/main/resources/token.txt
+src/main/resources/devToken.txt
 mastermind.log
 userData.json
