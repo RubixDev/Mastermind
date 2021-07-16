@@ -1,12 +1,18 @@
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.interaction.followUp
 import dev.kord.core.behavior.interaction.respondPublic
+import dev.kord.core.entity.interaction.CommandInteraction
 import dev.kord.core.entity.interaction.OptionValue
 import dev.kord.core.event.interaction.InteractionCreateEvent
+import dev.kord.rest.builder.interaction.embed
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
+
+private val logger: Logger = LogManager.getLogger("Commands")
 
 @KordPreview
 suspend fun InteractionCreateEvent.showCommand() {
-    val responseBehavior = interaction.ackowledgePublic()
+    val responseBehavior = interaction.acknowledgePublic()
     showBoard(
         interaction.user.asUser(),
         interaction.data.guildId.value?.let { kord.getGuild(it) },
@@ -17,7 +23,7 @@ suspend fun InteractionCreateEvent.showCommand() {
 
 @KordPreview
 suspend fun InteractionCreateEvent.newGameCommand() {
-    val responseBehavior = interaction.ackowledgePublic()
+    val responseBehavior = interaction.acknowledgePublic()
     val botUser = getOrCreateUser(interaction.user.id.value)
     botUser.reset(interaction.user.asUser().username)
     showBoard(
@@ -30,7 +36,7 @@ suspend fun InteractionCreateEvent.newGameCommand() {
 
 @KordPreview
 suspend fun InteractionCreateEvent.setPinsCommand() {
-    val pins = (interaction.command.options["amount"] as OptionValue.IntOptionValue).value
+    val pins = ((interaction as CommandInteraction).command.options["amount"] as OptionValue.IntOptionValue).value
     if (pins !in 3..6) {
         interaction.respondPublic {
             embed {
@@ -40,7 +46,7 @@ suspend fun InteractionCreateEvent.setPinsCommand() {
             }
         }
     }
-    val responseBehavior = interaction.ackowledgePublic()
+    val responseBehavior = interaction.acknowledgePublic()
 
     val author = interaction.user.asUser()
     val botUser = getOrCreateUser(author.id.value)
@@ -119,9 +125,9 @@ suspend fun InteractionCreateEvent.rulesCommand() {
 
 @KordPreview
 suspend fun InteractionCreateEvent.allowMultiplesCommand() {
-    val responseBehavior = interaction.ackowledgePublic()
+    val responseBehavior = interaction.acknowledgePublic()
     val botUser = getOrCreateUser(interaction.user.id.value)
-    val allow = (interaction.command.options["allow"] as OptionValue.BooleanOptionValue).value
+    val allow = ((interaction as CommandInteraction).command.options["allow"] as OptionValue.BooleanOptionValue).value
     botUser.allowMultiples = allow
     botUser.reset(interaction.user.asUser().username)
     responseBehavior.followUp {

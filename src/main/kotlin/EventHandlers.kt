@@ -1,13 +1,19 @@
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.ChannelType
 import dev.kord.core.behavior.interaction.respondPublic
+import dev.kord.core.entity.interaction.CommandInteraction
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.guild.GuildDeleteEvent
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.event.message.ReactionAddEvent
-import dev.kord.x.emoji.toReaction
+import dev.kord.rest.builder.interaction.embed
+import kotlinx.datetime.toJavaInstant
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import java.time.Instant
+
+private val logger: Logger = LogManager.getLogger("EventHandlers")
 
 @KordPreview
 suspend fun ReadyEvent.handleReadyEvent() {
@@ -86,14 +92,21 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
         return
     }
 
-    when (interaction.command.rootId) {
-        commandIds[0] -> showCommand()
-        commandIds[1] -> newGameCommand()
-        commandIds[2] -> setPinsCommand()
-        commandIds[3],
-        commandIds[6] -> rulesCommand()
-        commandIds[4] -> allowMultiplesCommand()
-        commandIds[5] -> inviteCommand()
+    when ((interaction as CommandInteraction).command.rootId) {
+        testCommandIds["show"],
+        commandIds["show"] -> showCommand()
+        testCommandIds["newgame"],
+        commandIds["newgame"] -> newGameCommand()
+        testCommandIds["setpins"],
+        commandIds["setpins"] -> setPinsCommand()
+        testCommandIds["rules"],
+        commandIds["rules"],
+        testCommandIds["help"],
+        commandIds["help"] -> rulesCommand()
+        testCommandIds["allowmultiples"],
+        commandIds["allowmultiples"] -> allowMultiplesCommand()
+        testCommandIds["invite"],
+        commandIds["invite"] -> inviteCommand()
     }
 }
 
@@ -101,18 +114,16 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
 suspend fun ReactionAddEvent.handleReactionAddEvent() {
     if (user.id == kord.selfId) return
     if (messageId.value !in userData.map { it.activeMessageId }) return
-    if (getMessage().timestamp.isBefore(Instant.now().minusSeconds(30 * 60))) return
+    if (getMessage().timestamp.toJavaInstant().isBefore(Instant.now().minusSeconds(30 * 60L))) return
 
     val botUser = userData.find { it.activeMessageId == messageId.value } ?: return
     message.deleteReaction(userId, emoji)
     if (botUser.id != userId.value) return
 
-    val pinReactionEmojis = Constants.pinEmojis.map { it.toReaction() }
-
     when (emoji) {
-        in pinReactionEmojis -> handlePinReaction(botUser, pinReactionEmojis)
-        Emojis.back.toReaction() -> handleBackReaction(botUser)
-        Emojis.check.toReaction() -> handleCheckReaction(botUser)
+        in Constants.pinEmojis -> handlePinReaction(botUser)
+        Emojis.back.asReactionEmoji() -> handleBackReaction(botUser)
+        Emojis.check.asReactionEmoji() -> handleCheckReaction(botUser)
         else -> return
     }
 }

@@ -1,10 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.32"
-    kotlin("plugin.serialization") version "1.4.32"
+    kotlin("jvm") version "1.5.21"
+    kotlin("plugin.serialization") version "1.5.21"
     application
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
 group = "de.rubixdev"
@@ -12,13 +12,12 @@ version = "1.0"
 
 repositories {
     mavenCentral()
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
+    //maven("https://oss.sonatype.org/content/repositories/snapshots")
 }
 
 dependencies {
     // Kord
-    implementation("dev.kord:kord-core:0.7.0-RC2")
-    implementation("dev.kord.x:emoji:0.5.0-SNAPSHOT")
+    implementation("dev.kord:kord-core:0.7.3")
 
     // Logging
     implementation(platform("org.apache.logging.log4j:log4j-bom:2.14.1"))
@@ -27,7 +26,7 @@ dependencies {
     implementation("org.apache.logging.log4j", "log4j-slf4j-impl")
 
     // KotlinX
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 }
 
 application {

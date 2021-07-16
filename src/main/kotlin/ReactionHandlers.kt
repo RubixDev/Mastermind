@@ -1,11 +1,14 @@
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.channel.createEmbed
-import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.event.message.ReactionAddEvent
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
-suspend fun ReactionAddEvent.handlePinReaction(botUser: BotUser, pinReactionEmojis: List<ReactionEmoji.Unicode>) {
+private val logger: Logger = LogManager.getLogger("ReactionHandlers")
+
+suspend fun ReactionAddEvent.handlePinReaction(botUser: BotUser) {
     if (botUser.nextMove.size == botUser.pins) return
-    val newPin = pinReactionEmojis.indexOf(emoji)
+    val newPin = Constants.pinEmojis.indexOf(emoji)
     if (!botUser.allowMultiples && newPin in botUser.nextMove) return
     botUser.nextMove.add(newPin)
 
@@ -61,7 +64,7 @@ suspend fun ReactionAddEvent.handleCheckReaction(botUser: BotUser) {
             description = "You found the answer after ${botUser.board.rows.size} turns"
             field {
                 name = "The solution was"
-                value = botUser.board.solution.map { Constants.pinEmojis[it] }.joinToString("")
+                value = botUser.board.solution.joinToString("") { Constants.pinEmojis[it].name }
             }
             color = Constants.themeColor
             rubixFooter()

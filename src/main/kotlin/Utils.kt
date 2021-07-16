@@ -1,23 +1,27 @@
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
+import dev.kord.core.behavior.createApplicationCommand
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.PublicInteractionResponseBehavior
 import dev.kord.core.behavior.interaction.followUp
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.User
 import dev.kord.core.entity.channel.MessageChannel
-import dev.kord.core.entity.interaction.GlobalApplicationCommand
-import dev.kord.core.entity.interaction.GuildApplicationCommand
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.rest.builder.interaction.ApplicationCommandCreateBuilder
+import dev.kord.rest.builder.interaction.embed
 import dev.kord.rest.builder.message.EmbedBuilder
-import dev.kord.x.emoji.addReaction
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.toList
 import kotlinx.serialization.encodeToString
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import java.io.File
+
+private val logger: Logger = LogManager.getLogger("Utils")
 
 private operator fun String.times(n: Int): String {
     var out = ""
@@ -25,6 +29,10 @@ private operator fun String.times(n: Int): String {
         out += this
     }
     return out
+}
+
+fun String.asReactionEmoji(): ReactionEmoji.Unicode {
+    return ReactionEmoji.Unicode(this)
 }
 
 fun <T> Iterable<T>.countIndexed(predicate: (index: Int, T) -> Boolean): Int {
@@ -36,14 +44,28 @@ suspend fun ReadyEvent.addCommand(
     name: String,
     description: String,
     builder: ApplicationCommandCreateBuilder.() -> Unit = {}
-): GlobalApplicationCommand {
-    val cmd = kord.createGlobalApplicationCommand(
+) {
+//    val cmd = kord.createGlobalApplicationCommand(
+//        name,
+//        description,
+//        builder
+//    )
+//    commands[name] = cmd.id
+    addTestCommand(name, description, builder)
+}
+
+@KordPreview
+private suspend fun ReadyEvent.addTestCommand(
+    name: String,
+    description: String,
+    builder: ApplicationCommandCreateBuilder.() -> Unit = {}
+) {
+    val cmd = kord.getGuild(Snowflake(661936855167664148))!!.createApplicationCommand(
         name,
         description,
         builder
     )
-    commandIds.add(cmd.id)
-    return cmd
+    testCommandIds[name] = cmd.id
 }
 
 fun randomBoard(pins: Int = 4, allowMultiples: Boolean = true): Board {
@@ -101,7 +123,7 @@ suspend fun updateMessage(message: Message, botUser: BotUser, overrideDesc: Stri
             description = overrideDesc
                 ?: prevEmbed.description?.replaceBefore(
                     "\n",
-                    "_${botUser.nextMove.map { Constants.pinEmojis[it] }.joinToString("")} _"
+                    "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it].name }} _"
                 )
             color = prevEmbed.color
             footer {
@@ -134,16 +156,16 @@ suspend fun showBoard(
     var boardDisplay = ""
     for (row in botUser.board.rows.reversed()) {
         boardDisplay += "${
-            row.gamePins.map { Constants.pinEmojis[it] }.joinToString("")
+            row.gamePins.joinToString("") { Constants.pinEmojis[it].name }
         }   ${
-            Emojis.black.unicode * row.answerPins.black
+            Emojis.black * row.answerPins.black
         }${
-            Emojis.white.unicode * row.answerPins.white
+            Emojis.white * row.answerPins.white
         }\n"
     }
 
     val displayName = guild?.getMember(Snowflake(authorId))?.nickname ?: author.username
-    val desc = "_${botUser.nextMove.map { Constants.pinEmojis[it] }.joinToString("")} _\n$boardDisplay\n" +
+    val desc = "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it].name }} _\n$boardDisplay\n" +
             "Input your move using the reactions below, delete the last pin " +
             "using ${Emojis.back} and submit with ${Emojis.check}"
 
@@ -160,8 +182,8 @@ suspend fun showBoard(
         for (pinColor in Constants.pinEmojis.subList(0, (botUser.pins - 1) * 2)) {
             botMsg.addReaction(pinColor)
         }
-        botMsg.addReaction(Emojis.back)
-        botMsg.addReaction(Emojis.check)
+        botMsg.addReaction(Emojis.back.asReactionEmoji())
+        botMsg.addReaction(Emojis.check.asReactionEmoji())
 
         botUser.activeMessageId = botMsg.id.value
         logger.info("Displayed board for ${author.username}")

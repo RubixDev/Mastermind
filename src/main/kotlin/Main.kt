@@ -10,14 +10,13 @@ import dev.kord.core.event.message.ReactionAddEvent
 import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.Intents
-import dev.kord.x.emoji.Emojis as AllEmojis
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.io.File
 
-val logger: Logger = LogManager.getLogger("MainKt")
+private val logger: Logger = LogManager.getLogger("Main")
 val json = Json { prettyPrint = true }
 val userData = json.decodeFromString<MutableList<BotUser>>(
     File("userData.json")
@@ -25,23 +24,24 @@ val userData = json.decodeFromString<MutableList<BotUser>>(
         .readText()
         .ifEmpty { "[]" }
 )
-val commandIds = mutableListOf<Snowflake>()
+val commandIds = mutableMapOf<String, Snowflake>()
+val testCommandIds = mutableMapOf<String, Snowflake>()
 var isReady = false
 
 object Emojis {
-    val blue = AllEmojis.blueCircle
-    val green = AllEmojis.greenCircle
-    val red = AllEmojis.redCircle
-    val yellow = AllEmojis.yellowCircle
-    val black = AllEmojis.o
-    val white = AllEmojis.whiteCircle
-    val orange = AllEmojis.orangeCircle
-    val purple = AllEmojis.purpleCircle
-    val brown = AllEmojis.brownCircle
-    val gray = AllEmojis.blackCircle
+    const val blue = "\ud83d\udd35"
+    const val green = "\ud83d\udfe2"
+    const val red = "\ud83d\udd34"
+    const val yellow = "\ud83d\udfe1"
+    const val black = "\u2b55"
+    const val white = "\u26aa"
+    const val orange = "\ud83d\udfe0"
+    const val purple = "\ud83d\udfe3"
+    const val brown = "\ud83d\udfe4"
+    const val gray = "\u26ab"
 
-    val back = AllEmojis.arrowLeft
-    val check = AllEmojis.whiteCheckMark
+    const val back = "\u2b05\ufe0f"
+    const val check = "\u2705"
 }
 
 object Constants {
@@ -62,7 +62,7 @@ object Constants {
         Emojis.purple,
         Emojis.brown,
         Emojis.gray
-    )
+    ).map { it.asReactionEmoji() }
 }
 
 /**
@@ -70,7 +70,7 @@ object Constants {
  */
 @KordPreview
 suspend fun main() {
-    val client = Kord(object {}.javaClass.getResource("/token.txt")!!.readText()) {
+    val client = Kord(object {}.javaClass.getResource("/devToken.txt")!!.readText()) {
         intents = Intents(
             Intent.Guilds,
             Intent.GuildMessageReactions
