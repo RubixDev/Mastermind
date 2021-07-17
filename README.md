@@ -5,7 +5,6 @@ A Discord bot for the puzzle game 'Mastermind' from 1972
 - [Invite Bot](https://discord.com/api/oauth2/authorize?client_id=830490572765790220&permissions=10304&scope=bot%20applications.commands)
 - [top.gg](https://top.gg/bot/830490572765790220)
 - [discordbotlist.com](https://discordbotlist.com/bots/mastermind)
-- [discord.bots.gg](https://discord.bots.gg/bots/830490572765790220)
 - [Explanation Video](https://youtu.be/5X9_5cavUPw)
 
 ## Basic Rules
