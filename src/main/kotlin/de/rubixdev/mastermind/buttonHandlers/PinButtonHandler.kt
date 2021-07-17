@@ -3,6 +3,7 @@ package de.rubixdev.mastermind.buttonHandlers
 import de.rubixdev.mastermind.updateMessage
 import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
+import dev.kord.core.entity.User
 import dev.kord.core.entity.interaction.ComponentInteraction
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -27,5 +28,6 @@ suspend fun handlePinButtonPress(interaction: ComponentInteraction, botUser: Bot
         botUser,
         interaction = interaction
     )
-    logger.info("Added a pin ($pin) to the next move of ${interaction.user.asUser().username}")
+    // TODO: revert to interaction.user.asUser().username when next kord releases
+    logger.info("Added a pin ($pin) to the next move of ${User(interaction.data.user.value!!, interaction.kord).username}")
 }

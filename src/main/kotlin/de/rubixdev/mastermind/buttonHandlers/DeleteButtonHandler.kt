@@ -3,6 +3,7 @@ package de.rubixdev.mastermind.buttonHandlers
 import de.rubixdev.mastermind.updateMessage
 import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
+import dev.kord.core.entity.User
 import dev.kord.core.entity.interaction.ComponentInteraction
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -25,6 +26,7 @@ suspend fun handleDeleteButtonPress(interaction: ComponentInteraction, botUser: 
         botUser,
         interaction = interaction
     )
-    val username = interaction.user.asUser().username
+    // TODO: revert to interaction.user.asUser().username when next kord releases
+    val username = User(interaction.data.user.value!!, interaction.kord).username
     logger.info("Removed the last pin of $username'${if (username.endsWith('s')) "" else "s"} next move")
 }

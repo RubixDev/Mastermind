@@ -9,6 +9,7 @@ import de.rubixdev.mastermind.getOrCreateUser
 import de.rubixdev.mastermind.testCommandIds
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.InteractionType
+import dev.kord.core.entity.User
 import dev.kord.core.entity.interaction.CommandInteraction
 import dev.kord.core.entity.interaction.ComponentInteraction
 import dev.kord.core.event.interaction.InteractionCreateEvent
@@ -38,7 +39,7 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
         val buttonId = componentInteraction.componentId.split('-')
         val authorId = buttonId[0].toLong()
         val botUser = getOrCreateUser(authorId)
-        if (authorId != componentInteraction.user.id.value
+        if (authorId != User(componentInteraction.data.user.value!!, componentInteraction.kord).id.value
             || botUser.activeMessageId != componentInteraction.message?.id?.value
         ) {
             componentInteraction.acknowledgePublicDeferredMessageUpdate()
