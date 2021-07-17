@@ -1,6 +1,10 @@
 package de.rubixdev.mastermind.eventHandlers
 
-import de.rubixdev.mastermind.*
+import de.rubixdev.mastermind.Constants
+import de.rubixdev.mastermind.commandIds
+import de.rubixdev.mastermind.commands.*
+import de.rubixdev.mastermind.rubixFooter
+import de.rubixdev.mastermind.testCommandIds
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.ChannelType
 import dev.kord.core.behavior.interaction.respondPublic
