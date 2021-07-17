@@ -6,7 +6,6 @@ import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.interaction.followUp
 import dev.kord.core.entity.interaction.CommandInteraction
 import dev.kord.core.entity.interaction.OptionValue
-import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.rest.builder.interaction.embed
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -14,7 +13,7 @@ import org.apache.logging.log4j.Logger
 private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
-suspend fun InteractionCreateEvent.allowMultiplesCommand() {
+suspend fun allowMultiplesCommand(interaction: CommandInteraction) {
     val responseBehavior = interaction.acknowledgePublic()
     val botUser = getOrCreateUser(interaction.user.id.value)
     val allow = ((interaction as CommandInteraction).command.options["allow"] as OptionValue.BooleanOptionValue).value

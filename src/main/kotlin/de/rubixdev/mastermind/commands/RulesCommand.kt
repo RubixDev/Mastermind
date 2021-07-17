@@ -5,7 +5,7 @@ import de.rubixdev.mastermind.Emojis
 import de.rubixdev.mastermind.rubixFooter
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.interaction.respondPublic
-import dev.kord.core.event.interaction.InteractionCreateEvent
+import dev.kord.core.entity.interaction.CommandInteraction
 import dev.kord.rest.builder.interaction.embed
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger
 private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
-suspend fun InteractionCreateEvent.rulesCommand() {
+suspend fun rulesCommand(interaction: CommandInteraction) {
     interaction.respondPublic {
         embed {
             title = "Rules for Mastermind"

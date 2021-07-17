@@ -17,21 +17,22 @@ import dev.kord.core.event.interaction.InteractionCreateEvent
 @KordPreview
 suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
     if (interaction.type == InteractionType.ApplicationCommand) {
-        when ((interaction as CommandInteraction).command.rootId) {
+        val commandInteraction = interaction as CommandInteraction
+        when (commandInteraction.command.rootId) {
             testCommandIds["show"],
-            commandIds["show"] -> showCommand()
+            commandIds["show"] -> showCommand(commandInteraction)
             testCommandIds["newgame"],
-            commandIds["newgame"] -> newGameCommand()
+            commandIds["newgame"] -> newGameCommand(commandInteraction)
             testCommandIds["setpins"],
-            commandIds["setpins"] -> setPinsCommand()
+            commandIds["setpins"] -> setPinsCommand(commandInteraction)
             testCommandIds["rules"],
             commandIds["rules"],
             testCommandIds["help"],
-            commandIds["help"] -> rulesCommand()
+            commandIds["help"] -> rulesCommand(commandInteraction)
             testCommandIds["allowmultiples"],
-            commandIds["allowmultiples"] -> allowMultiplesCommand()
+            commandIds["allowmultiples"] -> allowMultiplesCommand(commandInteraction)
             testCommandIds["invite"],
-            commandIds["invite"] -> inviteCommand()
+            commandIds["invite"] -> inviteCommand(commandInteraction)
         }
     } else {
         val componentInteraction = interaction as ComponentInteraction
