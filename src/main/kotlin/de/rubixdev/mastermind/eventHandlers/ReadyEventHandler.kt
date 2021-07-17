@@ -16,26 +16,17 @@ suspend fun ReadyEvent.handleReadyEvent() {
     updatePresence()
     logger.info("Bot currently on guilds:${displayGuilds()}")
 
-    addCommand(
-        "show",
-        "Shows current board or starts a new game if previous one is finished"
-    )
-    addCommand(
-        "newgame",
-        "Cancels the current game and starts a new one"
-    )
-    addCommand(
-        "setpins",
-        "Sets the amount of pins you want to play with"
-    ) {
+    addCommand("show", "Shows current board or starts a new game if previous one is finished")
+    addCommand("newgame", "Cancels the current game and starts a new one")
+    addCommand("rules", "Explains the game and commands")
+    addCommand("invite", "Displays an invite link for this bot")
+    addCommand("help", "Alias for /rules")
+    addCommand("config", "Displays a config screen")
+    addCommand("setpins", "Sets the amount of pins you want to play with") {
         int("amount", "Amount of pins. Value between 3 and 6") {
             required = true
         }
     }
-    addCommand(
-        "rules",
-        "Explains the game and commands"
-    )
     addCommand(
         "allowmultiples",
         "Allows having multiple pins of the same color in the solution. True by default"
@@ -44,14 +35,6 @@ suspend fun ReadyEvent.handleReadyEvent() {
             required = true
         }
     }
-    addCommand(
-        "invite",
-        "Displays an invite link for this bot"
-    )
-    addCommand(
-        "help",
-        "Alias for /rules"
-    )
 
     isReady = true
 }

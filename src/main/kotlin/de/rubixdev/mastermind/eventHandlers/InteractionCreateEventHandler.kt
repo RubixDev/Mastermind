@@ -33,6 +33,8 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
             commandIds["allowmultiples"] -> allowMultiplesCommand(commandInteraction)
             testCommandIds["invite"],
             commandIds["invite"] -> inviteCommand(commandInteraction)
+            testCommandIds["config"],
+            commandIds["config"] -> configCommand(commandInteraction)
         }
     } else {
         val componentInteraction = interaction as ComponentInteraction
