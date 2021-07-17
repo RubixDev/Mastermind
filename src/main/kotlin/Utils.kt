@@ -21,7 +21,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.io.File
 
-private val logger: Logger = LogManager.getLogger("Utils")
+private val logger: Logger = LogManager.getLogger()
 
 private operator fun String.times(n: Int): String {
     var out = ""

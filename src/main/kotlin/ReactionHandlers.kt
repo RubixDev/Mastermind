@@ -4,7 +4,7 @@ import dev.kord.core.event.message.ReactionAddEvent
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-private val logger: Logger = LogManager.getLogger("ReactionHandlers")
+private val logger: Logger = LogManager.getLogger()
 
 suspend fun ReactionAddEvent.handlePinReaction(botUser: BotUser) {
     if (botUser.nextMove.size == botUser.pins) return

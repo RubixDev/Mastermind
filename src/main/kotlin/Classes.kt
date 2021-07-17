@@ -3,7 +3,7 @@ import kotlinx.serialization.Serializable
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-private val logger: Logger = LogManager.getLogger("Classes")
+private val logger: Logger = LogManager.getLogger()
 
 data class BotAuthor(
     val user: User,

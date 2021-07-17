@@ -12,11 +12,8 @@ import dev.kord.gateway.Intent
 import dev.kord.gateway.Intents
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import java.io.File
 
-private val logger: Logger = LogManager.getLogger("Main")
 val json = Json { prettyPrint = true }
 val userData = json.decodeFromString<MutableList<BotUser>>(
     File("userData.json")
