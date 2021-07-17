@@ -3,11 +3,11 @@
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout
-                    pattern="%highlight{[ %-12d{HH:mm:ss.SSS} ] (%-5level) [%c{1.}]:  %m%n}{FATAL=bg_red black, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=blue}"
+                    pattern="%style{[ %-12d{HH:mm:ss.SSS} ]}{BLUE} %highlight{&lt;%-5level&gt;}{FATAL=bg_red black, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=blue} %style{(%25c{1.})}{CYAN}  %highlight{%m%n}{FATAL=red, ERROR=red, WARN=normal, INFO=normal, DEBUG=normal, TRACE=normal}"
                     disableAnsi="false"/>
         </Console>
         <File name="LogFile" fileName="mastermind.log" immediateFlush="false" append="false">
-            <PatternLayout pattern="[ %-23d{dd-MM-yyyy HH:mm:ss.SSS} ] (%-5level) [%c]:  %m%n"/>
+            <PatternLayout pattern="[ %-23d{dd-MM-yyyy HH:mm:ss.SSS} ] &lt;%-5level&gt; (%30c)  %m%n"/>
         </File>
     </Appenders>
     <Loggers>
