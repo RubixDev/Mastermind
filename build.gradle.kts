@@ -35,7 +35,10 @@ application {
 
 tasks.jar {
     manifest {
-        attributes(mapOf("Main-Class" to "de.rubixdev.mastermind.MainKt"))
+        attributes(mapOf(
+            "Main-Class" to "de.rubixdev.mastermind.MainKt",
+            "Multi-Release" to "true"
+        ))
     }
 }
 
