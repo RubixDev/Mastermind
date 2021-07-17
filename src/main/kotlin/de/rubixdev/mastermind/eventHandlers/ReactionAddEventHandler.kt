@@ -19,7 +19,6 @@ import java.time.Instant
 private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
-@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun ReactionAddEvent.handleReactionAddEvent() {
     if (user.id == kord.selfId) return
     if (messageId.value !in userData.map { it.activeMessageId }) return

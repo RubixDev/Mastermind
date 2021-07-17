@@ -9,7 +9,6 @@ import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.rest.builder.interaction.embed
 
 @KordPreview
-@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
     if (interaction.getChannel().type != ChannelType.GuildText) {
         interaction.respondPublic {

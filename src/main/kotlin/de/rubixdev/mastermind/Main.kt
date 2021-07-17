@@ -19,12 +19,11 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.File
 
-@kotlinx.serialization.ExperimentalSerializationApi
+@Suppress("EXPERIMENTAL_API_USAGE")
 val json = Json {
     prettyPrint = true
     prettyPrintIndent = "  "
 }
-@kotlinx.serialization.ExperimentalSerializationApi
 val userData = json.decodeFromString<MutableList<BotUser>>(
     File("userData.json")
         .also { it.createNewFile() }
@@ -34,6 +33,7 @@ val userData = json.decodeFromString<MutableList<BotUser>>(
 val commandIds = mutableMapOf<String, Snowflake>()
 val testCommandIds = mutableMapOf<String, Snowflake>()
 var isReady = false
+lateinit var client: Kord
 
 object Emojis {
     const val blue = "\ud83d\udd35"
@@ -79,9 +79,8 @@ object Constants {
  * [Invite bot](https://discord.com/api/oauth2/authorize?client_id=830490572765790220&permissions=10304&scope=bot%20applications.commands)
  */
 @KordPreview
-@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun main() {
-    val client = Kord(object {}.javaClass.getResource("/token.txt")!!.readText()) {
+    client = Kord(object {}.javaClass.getResource("/devToken.txt")!!.readText()) {
         intents = Intents(
             Intent.Guilds,
             Intent.GuildMessageReactions

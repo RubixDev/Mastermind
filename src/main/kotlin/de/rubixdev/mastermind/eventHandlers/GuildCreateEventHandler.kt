@@ -11,7 +11,7 @@ private val logger: Logger = LogManager.getLogger()
 
 suspend fun GuildCreateEvent.handleGuildCreateEvent() {
     if (isReady) {
-        updatePresence(kord)
-        logger.info("Joined guild '${guild.name}'. Now on guilds:${displayGuilds(kord)}")
+        updatePresence()
+        logger.info("Joined guild '${guild.name}'. Now on guilds:${displayGuilds()}")
     }
 }

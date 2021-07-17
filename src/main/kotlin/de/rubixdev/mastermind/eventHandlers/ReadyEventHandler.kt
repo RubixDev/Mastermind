@@ -13,8 +13,8 @@ private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
 suspend fun ReadyEvent.handleReadyEvent() {
-    updatePresence(kord)
-    logger.info("Bot currently on guilds:${displayGuilds(kord)}")
+    updatePresence()
+    logger.info("Bot currently on guilds:${displayGuilds()}")
 
     addCommand(
         "show",

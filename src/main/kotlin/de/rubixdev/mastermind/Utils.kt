@@ -5,7 +5,6 @@ import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
-import dev.kord.core.Kord
 import dev.kord.core.behavior.createApplicationCommand
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.PublicInteractionResponseBehavior
@@ -128,14 +127,12 @@ fun randomBoard(pins: Int = 4, allowMultiples: Boolean = true): Board {
     }
 }
 
-@kotlinx.serialization.ExperimentalSerializationApi
-fun getOrCreateUser(id: Long): BotUser {
+suspend fun getOrCreateUser(id: Long): BotUser {
     return userData.find { it.id == id }
         ?: BotUser(id, 0, 4, true, mutableListOf(), randomBoard())
-            .also { userData.add(it) }
+            .also { userData.add(it); updatePresence() }
 }
 
-@kotlinx.serialization.ExperimentalSerializationApi
 fun saveUserData() {
     File("userData.json")
         .also { it.createNewFile() }
@@ -147,9 +144,9 @@ fun EmbedBuilder.rubixFooter() = footer {
     icon = Constants.botAuthor.avatar
 }
 
-suspend fun updatePresence(kord: Kord) {
-    kord.editPresence {
-        playing("Mastermind on ${kord.guilds.count()} servers")
+suspend fun updatePresence() {
+    client.editPresence {
+        playing("Mastermind on ${client.guilds.count()} servers with ${userData.size} unique users")
     }
 }
 
@@ -172,14 +169,13 @@ suspend fun updateMessage(message: Message, botUser: BotUser, overrideDesc: Stri
     }
 }
 
-suspend fun displayGuilds(kord: Kord): String {
-    return kord.guilds.toList().joinToString("\n        ", "\n        ") {
+suspend fun displayGuilds(): String {
+    return client.guilds.toList().joinToString("\n        ", "\n        ") {
         "${it.name} --> ${it.id.value}"
     }
 }
 
 @KordPreview
-@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun showBoard(
     author: User,
     guild: Guild?,
