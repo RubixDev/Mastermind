@@ -128,12 +128,14 @@ fun randomBoard(pins: Int = 4, allowMultiples: Boolean = true): Board {
     }
 }
 
+@kotlinx.serialization.ExperimentalSerializationApi
 fun getOrCreateUser(id: Long): BotUser {
     return userData.find { it.id == id }
         ?: BotUser(id, 0, 4, true, mutableListOf(), randomBoard())
             .also { userData.add(it) }
 }
 
+@kotlinx.serialization.ExperimentalSerializationApi
 fun saveUserData() {
     File("userData.json")
         .also { it.createNewFile() }
@@ -177,6 +179,7 @@ suspend fun displayGuilds(kord: Kord): String {
 }
 
 @KordPreview
+@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun showBoard(
     author: User,
     guild: Guild?,

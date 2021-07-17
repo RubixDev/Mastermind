@@ -19,7 +19,12 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.File
 
-val json = Json { prettyPrint = true }
+@kotlinx.serialization.ExperimentalSerializationApi
+val json = Json {
+    prettyPrint = true
+    prettyPrintIndent = "  "
+}
+@kotlinx.serialization.ExperimentalSerializationApi
 val userData = json.decodeFromString<MutableList<BotUser>>(
     File("userData.json")
         .also { it.createNewFile() }
@@ -74,6 +79,7 @@ object Constants {
  * [Invite bot](https://discord.com/api/oauth2/authorize?client_id=830490572765790220&permissions=10304&scope=bot%20applications.commands)
  */
 @KordPreview
+@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun main() {
     val client = Kord(object {}.javaClass.getResource("/token.txt")!!.readText()) {
         intents = Intents(

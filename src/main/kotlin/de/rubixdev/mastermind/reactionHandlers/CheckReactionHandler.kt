@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger
 private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
+@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun ReactionAddEvent.handleCheckReaction(botUser: BotUser) {
     if (botUser.nextMove.size != botUser.pins) return
 

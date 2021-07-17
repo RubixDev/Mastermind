@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger
 private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
+@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun InteractionCreateEvent.showCommand() {
     val responseBehavior = interaction.acknowledgePublic()
     if (!testPermissions(responseBehavior)) return
@@ -26,6 +27,7 @@ suspend fun InteractionCreateEvent.showCommand() {
 }
 
 @KordPreview
+@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun InteractionCreateEvent.newGameCommand() {
     val responseBehavior = interaction.acknowledgePublic()
     if (!testPermissions(responseBehavior)) return
@@ -41,6 +43,7 @@ suspend fun InteractionCreateEvent.newGameCommand() {
 }
 
 @KordPreview
+@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun InteractionCreateEvent.setPinsCommand() {
     val pins = ((interaction as CommandInteraction).command.options["amount"] as OptionValue.IntOptionValue).value
     if (pins !in 3..6) {
@@ -130,6 +133,7 @@ suspend fun InteractionCreateEvent.rulesCommand() {
 }
 
 @KordPreview
+@kotlinx.serialization.ExperimentalSerializationApi
 suspend fun InteractionCreateEvent.allowMultiplesCommand() {
     val responseBehavior = interaction.acknowledgePublic()
     val botUser = getOrCreateUser(interaction.user.id.value)
