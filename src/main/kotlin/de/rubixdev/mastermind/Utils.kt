@@ -52,15 +52,16 @@ suspend fun ReadyEvent.addCommand(
     description: String,
     builder: ApplicationCommandCreateBuilder.() -> Unit = {}
 ) {
-//    val cmd = kord.createGlobalApplicationCommand(
-//        name,
-//        description,
-//        builder
-//    )
-//    commands[name] = cmd.id
-    addTestCommand(name, description, builder)
+    val cmd = kord.createGlobalApplicationCommand(
+        name,
+        description,
+        builder
+    )
+    commandIds[name] = cmd.id
+//    addTestCommand(name, description, builder)
 }
 
+@Suppress("unused")
 @KordPreview
 private suspend fun ReadyEvent.addTestCommand(
     name: String,
