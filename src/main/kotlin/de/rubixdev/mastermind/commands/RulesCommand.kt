@@ -59,12 +59,6 @@ suspend fun rulesCommand(interaction: CommandInteraction) {
                         "the solutions. Is on by default.\n" +
                         "- `/invite` Displays an invite link for this bot"
             }
-            field {
-                name = "Important"
-                value = "Be patient! The bot needs some time to react to your reactions and to display your " +
-                        "input. If you spam reactions too quickly, there is a chance you'll get rate limited " +
-                        "by Discord."
-            }
             color = Constants.themeColor
             rubixFooter()
         }
