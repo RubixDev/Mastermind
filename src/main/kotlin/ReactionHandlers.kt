@@ -13,7 +13,7 @@ suspend fun ReactionAddEvent.handlePinReaction(botUser: BotUser) {
     botUser.nextMove.add(newPin)
 
     updateMessage(getMessage(), botUser)
-    logger.info("Added a pin to the next move of ${getUser().username}")
+    logger.info("Added a pin ($newPin) to the next move of ${getUser().username}")
 }
 
 suspend fun ReactionAddEvent.handleBackReaction(botUser: BotUser) {
@@ -21,7 +21,7 @@ suspend fun ReactionAddEvent.handleBackReaction(botUser: BotUser) {
     botUser.nextMove.removeLast()
 
     updateMessage(getMessage(), botUser)
-    logger.info("Removed last pin of the next move of ${getUser().username}")
+    logger.info("Removed the last pin of the next move of ${getUser().username}")
 }
 
 @KordPreview
@@ -56,9 +56,15 @@ suspend fun ReactionAddEvent.handleCheckReaction(botUser: BotUser) {
     )
     botUser.nextMove.clear()
 
-    logger.info("Processed move of ${getUser().username}")
+    logger.info(
+        "Processed move of ${getUser().username}: (${botUser.board.rows.last().gamePins.joinToString(")(")})"
+    )
 
     if (blackPins == botUser.pins) {
+        logger.info(
+            "${getUser().username} found the solution after ${botUser.board.rows.size} turns: " +
+                    "(${botUser.board.solution.joinToString(")(")})"
+        )
         channel.createEmbed {
             title = "Congratulations!"
             description = "You found the answer after ${botUser.board.rows.size} turns"

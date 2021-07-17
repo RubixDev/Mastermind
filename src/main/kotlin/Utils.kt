@@ -1,4 +1,6 @@
+
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.createApplicationCommand
@@ -9,8 +11,10 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.User
+import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.MessageChannel
 import dev.kord.core.event.gateway.ReadyEvent
+import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.rest.builder.interaction.ApplicationCommandCreateBuilder
 import dev.kord.rest.builder.interaction.embed
 import dev.kord.rest.builder.message.EmbedBuilder
@@ -66,6 +70,34 @@ private suspend fun ReadyEvent.addTestCommand(
         builder
     )
     testCommandIds[name] = cmd.id
+}
+
+@KordPreview
+suspend fun InteractionCreateEvent.testPermissions(responseBehavior: PublicInteractionResponseBehavior): Boolean {
+    val channel = interaction.getChannel() as GuildMessageChannel
+    if (!channel.getEffectivePermissions(kord.selfId).contains(Permission.AddReactions)) {
+        responseBehavior.followUp {
+            embed {
+                title = "I can't play with you here"
+                description = "I am not allowed to add new reactions to messages in this channel, " +
+                        "which is required for me to work. Please allow me to do so."
+                color = Constants.errorColor
+            }
+        }
+        return false
+    }
+    if (!channel.getEffectivePermissions(kord.selfId).contains(Permission.ManageMessages)) {
+        responseBehavior.followUp {
+            embed {
+                title = "That is not supposed to happen"
+                color = Constants.errorColor
+                description = "I don't seem to have the permission to remove your reactions, so you will " +
+                        "have to do that yourself. " +
+                        "For the best experience please allow me to manage messages in this channel."
+            }
+        }
+    }
+    return true
 }
 
 fun randomBoard(pins: Int = 4, allowMultiples: Boolean = true): Board {

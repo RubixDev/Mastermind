@@ -1,3 +1,4 @@
+
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.interaction.followUp
 import dev.kord.core.behavior.interaction.respondPublic
@@ -8,11 +9,13 @@ import dev.kord.rest.builder.interaction.embed
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-private val logger: Logger = LogManager.getLogger("Commands")
+private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
 suspend fun InteractionCreateEvent.showCommand() {
     val responseBehavior = interaction.acknowledgePublic()
+    if (!testPermissions(responseBehavior)) return
+
     showBoard(
         interaction.user.asUser(),
         interaction.data.guildId.value?.let { kord.getGuild(it) },
@@ -24,6 +27,8 @@ suspend fun InteractionCreateEvent.showCommand() {
 @KordPreview
 suspend fun InteractionCreateEvent.newGameCommand() {
     val responseBehavior = interaction.acknowledgePublic()
+    if (!testPermissions(responseBehavior)) return
+
     val botUser = getOrCreateUser(interaction.user.id.value)
     botUser.reset(interaction.user.asUser().username)
     showBoard(
@@ -145,8 +150,7 @@ suspend fun InteractionCreateEvent.inviteCommand() {
     interaction.respondPublic {
         embed {
             title = "Invite me using this link:"
-            description = "https://discord.com/api/oauth2/authorize?client_id=830490572765790220&permissions=10304" +
-                    "&scope=bot%20applications.commands"
+            description = Constants.inviteLink
             color = Constants.successColor
             rubixFooter()
         }

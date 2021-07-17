@@ -1,6 +1,9 @@
+
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.ChannelType
+import dev.kord.common.entity.Permission
 import dev.kord.core.behavior.interaction.respondPublic
+import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.interaction.CommandInteraction
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.guild.GuildCreateEvent
@@ -13,7 +16,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.time.Instant
 
-private val logger: Logger = LogManager.getLogger("EventHandlers")
+private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
 suspend fun ReadyEvent.handleReadyEvent() {
@@ -83,8 +86,7 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
                 description = "This bot does not work in this channel. " +
                         "Please use it in a normal server text channel.\n" +
                         "Use this link to invite me to your server:\n" +
-                        "https://discord.com/api/oauth2/authorize?client_id=830490572765790220&permissions=10304" +
-                        "&scope=bot%20applications.commands"
+                        Constants.inviteLink
                 color = Constants.errorColor
                 rubixFooter()
             }
@@ -117,7 +119,12 @@ suspend fun ReactionAddEvent.handleReactionAddEvent() {
     if (getMessage().timestamp.toJavaInstant().isBefore(Instant.now().minusSeconds(30 * 60L))) return
 
     val botUser = userData.find { it.activeMessageId == messageId.value } ?: return
-    message.deleteReaction(userId, emoji)
+    val channel = message.getChannel() as GuildMessageChannel
+    if (channel.getEffectivePermissions(kord.selfId).contains(Permission.ManageMessages)) {
+        message.deleteReaction(userId, emoji)
+    } else {
+        logger.warn("Missing permission to remove reactions")
+    }
     if (botUser.id != userId.value) return
 
     when (emoji) {

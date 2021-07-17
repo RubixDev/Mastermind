@@ -46,6 +46,9 @@ object Constants {
     val errorColor = Color(0xff0000)
     val successColor = Color(0x00ff00)
 
+    const val inviteLink = "https://discord.com/api/oauth2/authorize?client_id=830490572765790220&permissions=10304" +
+            "&scope=bot%20applications.commands"
+
     lateinit var botAuthor: BotAuthor
 
     val pinEmojis = listOf(
