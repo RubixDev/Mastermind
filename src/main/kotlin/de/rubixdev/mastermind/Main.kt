@@ -1,3 +1,8 @@
+package de.rubixdev.mastermind
+
+import de.rubixdev.mastermind.eventHandlers.*
+import de.rubixdev.mastermind.userData.BotAuthor
+import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.Color
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Snowflake

@@ -1,3 +1,9 @@
+package de.rubixdev.mastermind.reactionHandlers
+
+import de.rubixdev.mastermind.*
+import de.rubixdev.mastermind.userData.AnswerPins
+import de.rubixdev.mastermind.userData.BoardRow
+import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.event.message.ReactionAddEvent
@@ -5,24 +11,6 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
 private val logger: Logger = LogManager.getLogger()
-
-suspend fun ReactionAddEvent.handlePinReaction(botUser: BotUser) {
-    if (botUser.nextMove.size == botUser.pins) return
-    val newPin = Constants.pinEmojis.indexOf(emoji)
-    if (!botUser.allowMultiples && newPin in botUser.nextMove) return
-    botUser.nextMove.add(newPin)
-
-    updateMessage(getMessage(), botUser)
-    logger.info("Added a pin ($newPin) to the next move of ${getUser().username}")
-}
-
-suspend fun ReactionAddEvent.handleBackReaction(botUser: BotUser) {
-    if (botUser.nextMove.isEmpty()) return
-    botUser.nextMove.removeLast()
-
-    updateMessage(getMessage(), botUser)
-    logger.info("Removed the last pin of the next move of ${getUser().username}")
-}
 
 @KordPreview
 suspend fun ReactionAddEvent.handleCheckReaction(botUser: BotUser) {

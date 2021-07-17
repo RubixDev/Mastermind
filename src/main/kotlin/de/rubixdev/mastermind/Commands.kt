@@ -1,3 +1,4 @@
+package de.rubixdev.mastermind
 
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.interaction.followUp

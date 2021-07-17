@@ -1,4 +1,7 @@
+package de.rubixdev.mastermind
 
+import de.rubixdev.mastermind.userData.Board
+import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake

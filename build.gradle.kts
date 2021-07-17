@@ -30,12 +30,12 @@ dependencies {
 }
 
 application {
-    mainClassName = "MainKt"
+    mainClassName = "de.rubixdev.mastermind.MainKt"
 }
 
 tasks.jar {
     manifest {
-        attributes(mapOf("Main-Class" to "MainKt"))
+        attributes(mapOf("Main-Class" to "de.rubixdev.mastermind.MainKt"))
     }
 }
 
