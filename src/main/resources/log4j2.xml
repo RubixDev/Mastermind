@@ -7,7 +7,7 @@
                     disableAnsi="false"/>
         </Console>
         <File name="LogFile" fileName="mastermind.log" immediateFlush="false" append="false">
-            <PatternLayout pattern="[ %-23d{dd-MM-yyyy HH:mm:ss.SSS} ] &lt;%-5level&gt; (%50c)  %m%n"/>
+            <PatternLayout pattern="[ %-23d{dd-MM-yyyy HH:mm:ss.SSS} ] &lt;%-5level&gt; (%100c)  %m%n"/>
         </File>
     </Appenders>
     <Loggers>
