@@ -2,7 +2,6 @@ package de.rubixdev.mastermind.commands
 
 import de.rubixdev.mastermind.client
 import de.rubixdev.mastermind.getOrCreateUser
-import de.rubixdev.mastermind.showBoard
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.entity.interaction.CommandInteraction
 

@@ -1,11 +1,11 @@
 package de.rubixdev.mastermind.eventHandlers
 
-import de.rubixdev.mastermind.addCommand
-import de.rubixdev.mastermind.displayGuilds
-import de.rubixdev.mastermind.isReady
-import de.rubixdev.mastermind.updatePresence
+import de.rubixdev.mastermind.*
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.Snowflake
+import dev.kord.core.behavior.createApplicationCommand
 import dev.kord.core.event.gateway.ReadyEvent
+import dev.kord.rest.builder.interaction.ApplicationCommandCreateBuilder
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -54,4 +54,34 @@ suspend fun ReadyEvent.handleReadyEvent() {
     )
 
     isReady = true
+}
+
+@KordPreview
+private suspend fun ReadyEvent.addCommand(
+    name: String,
+    description: String,
+    builder: ApplicationCommandCreateBuilder.() -> Unit = {}
+) {
+    val cmd = kord.createGlobalApplicationCommand(
+        name,
+        description,
+        builder
+    )
+    commandIds[name] = cmd.id
+    addTestCommand(name, description, builder)
+}
+
+@Suppress("unused")
+@KordPreview
+private suspend fun ReadyEvent.addTestCommand(
+    name: String,
+    description: String,
+    builder: ApplicationCommandCreateBuilder.() -> Unit = {}
+) {
+    val cmd = kord.getGuild(Snowflake(661936855167664148))!!.createApplicationCommand(
+        name,
+        description,
+        builder
+    )
+    testCommandIds[name] = cmd.id
 }

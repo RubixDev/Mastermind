@@ -16,7 +16,7 @@ private val logger: Logger = LogManager.getLogger()
 suspend fun allowMultiplesCommand(interaction: CommandInteraction) {
     val responseBehavior = interaction.acknowledgePublic()
     val botUser = getOrCreateUser(interaction.user.id.value)
-    val allow = ((interaction as CommandInteraction).command.options["allow"] as OptionValue.BooleanOptionValue).value
+    val allow = (interaction.command.options["allow"] as OptionValue.BooleanOptionValue).value
     botUser.allowMultiples = allow
     botUser.reset(interaction.user.asUser().username)
     responseBehavior.followUp {

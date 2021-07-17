@@ -1,6 +1,6 @@
 package de.rubixdev.mastermind.buttonHandlers
 
-import de.rubixdev.mastermind.updateMessage
+import de.rubixdev.mastermind.commands.updateMessage
 import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.entity.User
