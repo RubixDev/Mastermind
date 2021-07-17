@@ -3,21 +3,22 @@ package de.rubixdev.mastermind
 import de.rubixdev.mastermind.userData.Board
 import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.Permission
+import dev.kord.common.entity.ButtonStyle
+import dev.kord.common.entity.DiscordPartialEmoji
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.createApplicationCommand
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.PublicInteractionResponseBehavior
+import dev.kord.core.behavior.interaction.acknowledgePublicUpdateMessage
 import dev.kord.core.behavior.interaction.followUp
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
-import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.User
-import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.MessageChannel
+import dev.kord.core.entity.interaction.ComponentInteraction
 import dev.kord.core.event.gateway.ReadyEvent
-import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.rest.builder.interaction.ApplicationCommandCreateBuilder
+import dev.kord.rest.builder.interaction.actionRow
 import dev.kord.rest.builder.interaction.embed
 import dev.kord.rest.builder.message.EmbedBuilder
 import kotlinx.coroutines.flow.count
@@ -37,10 +38,6 @@ private operator fun String.times(n: Int): String {
     return out
 }
 
-fun String.asReactionEmoji(): ReactionEmoji.Unicode {
-    return ReactionEmoji.Unicode(this)
-}
-
 fun <T> Iterable<T>.countIndexed(predicate: (index: Int, T) -> Boolean): Int {
     return this.filterIndexed(predicate).size
 }
@@ -57,7 +54,7 @@ suspend fun ReadyEvent.addCommand(
         builder
     )
     commandIds[name] = cmd.id
-//    addTestCommand(name, description, builder)
+    addTestCommand(name, description, builder)
 }
 
 @Suppress("unused")
@@ -73,34 +70,6 @@ private suspend fun ReadyEvent.addTestCommand(
         builder
     )
     testCommandIds[name] = cmd.id
-}
-
-@KordPreview
-suspend fun InteractionCreateEvent.testPermissions(responseBehavior: PublicInteractionResponseBehavior): Boolean {
-    val channel = interaction.getChannel() as GuildMessageChannel
-    if (!channel.getEffectivePermissions(kord.selfId).contains(Permission.AddReactions)) {
-        responseBehavior.followUp {
-            embed {
-                title = "I can't play with you here"
-                description = "I am not allowed to add new reactions to messages in this channel, " +
-                        "which is required for me to work. Please allow me to do so."
-                color = Constants.errorColor
-            }
-        }
-        return false
-    }
-    if (!channel.getEffectivePermissions(kord.selfId).contains(Permission.ManageMessages)) {
-        responseBehavior.followUp {
-            embed {
-                title = "That is not supposed to happen"
-                color = Constants.errorColor
-                description = "I don't seem to have the permission to remove your reactions, so you will " +
-                        "have to do that yourself. " +
-                        "For the best experience please allow me to manage messages in this channel."
-            }
-        }
-    }
-    return true
 }
 
 fun randomBoard(pins: Int = 4, allowMultiples: Boolean = true): Board {
@@ -150,21 +119,46 @@ suspend fun updatePresence() {
     }
 }
 
-suspend fun updateMessage(message: Message, botUser: BotUser, overrideDesc: String? = null) {
-    message.edit {
-        embed {
-            val prevEmbed = message.embeds[0]
-            title = prevEmbed.title
-            description = overrideDesc
-                ?: prevEmbed.description?.replaceBefore(
-                    "\n",
-                    "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it].name }} _"
-                )
-            color = prevEmbed.color
-            footer {
-                text = prevEmbed.footer?.text ?: "Bot made by ${Constants.botAuthor.displayName}"
-                icon = prevEmbed.footer?.iconUrl ?: Constants.botAuthor.avatar
+@KordPreview
+suspend fun updateMessage(
+    message: Message,
+    botUser: BotUser,
+    overrideDesc: String? = null,
+    interaction: ComponentInteraction? = null
+) {
+    val prevEmbed = message.embeds.getOrNull(0) ?: run {
+        logger.warn("Embed removed")
+        message.edit {
+            embed {
+                title = "Error"
+                description = "The embed on the active message seems to be gone. " +
+                        "To continue playing use `/show` again."
+                color = Constants.errorColor
             }
+        }
+        return
+    }
+
+    val embed: EmbedBuilder.() -> Unit = {
+        title = prevEmbed.title
+        description = overrideDesc ?: prevEmbed.description?.replaceBefore(
+            "\n",
+            "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it] }} _"
+        )
+        color = prevEmbed.color
+        footer {
+            text = prevEmbed.footer?.text ?: "Bot made by ${Constants.botAuthor.displayName}"
+            icon = prevEmbed.footer?.iconUrl ?: Constants.botAuthor.avatar
+        }
+    }
+
+    if (interaction != null) {
+        interaction.acknowledgePublicUpdateMessage {
+            embed(embed)
+        }
+    } else {
+        message.edit {
+            embed(embed)
         }
     }
 }
@@ -180,7 +174,8 @@ suspend fun showBoard(
     author: User,
     guild: Guild?,
     channel: MessageChannel,
-    responseBehavior: PublicInteractionResponseBehavior?
+    responseBehavior: PublicInteractionResponseBehavior? = null,
+    interaction: ComponentInteraction? = null
 ) {
     val authorId = author.id.value
     val botUser = getOrCreateUser(authorId)
@@ -191,7 +186,7 @@ suspend fun showBoard(
     var boardDisplay = ""
     for (row in botUser.board.rows.reversed()) {
         boardDisplay += "${
-            row.gamePins.joinToString("") { Constants.pinEmojis[it].name }
+            row.gamePins.joinToString("") { Constants.pinEmojis[it] }
         }   ${
             Emojis.black * row.answerPins.black
         }${
@@ -200,32 +195,48 @@ suspend fun showBoard(
     }
 
     val displayName = guild?.getMember(Snowflake(authorId))?.nickname ?: author.username
-    val desc = "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it].name }} _\n$boardDisplay\n" +
-            "Input your move using the reactions below, delete the last pin " +
-            "using ${Emojis.back} and submit with ${Emojis.check}"
+    val desc = "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it] }} _\n$boardDisplay\n" +
+            "Use the buttons below to input your move and submit when done."
+    val pinButtons = Constants.pinEmojis.subList(0, (botUser.pins - 1) * 2).mapIndexed { i, it -> i to it }
+    val chunkSize = when (pinButtons.size) {
+        6 -> 3
+        8 -> 4
+        else -> 5
+    }
 
-    if (responseBehavior != null) {
-        val botMsg = responseBehavior.followUp {
-            embed {
-                title = "Current board of $displayName"
-                description = desc
-                color = Constants.themeColor
-                rubixFooter()
-            }
-        }.message
+    when {
+        responseBehavior != null -> {
+            val botMsg = responseBehavior.followUp {
+                embed {
+                    title = "Current board of $displayName"
+                    description = desc
+                    color = Constants.themeColor
+                    rubixFooter()
+                }
+                for (pinButtonsSubList in pinButtons.chunked(chunkSize)) {
+                    actionRow {
+                        for ((pin, pinColor) in pinButtonsSubList) {
+                            interactionButton(ButtonStyle.Secondary, "$authorId-$pin") {
+                                emoji = DiscordPartialEmoji(name = pinColor)
+                            }
+                        }
+                    }
+                }
+                actionRow {
+                    interactionButton(ButtonStyle.Danger, "$authorId-delete") { label = "Remove last pin" }
+                    interactionButton(ButtonStyle.Success, "$authorId-submit") { label = "Submit" }
+                }
+            }.message
 
-        for (pinColor in Constants.pinEmojis.subList(0, (botUser.pins - 1) * 2)) {
-            botMsg.addReaction(pinColor)
+            botUser.activeMessageId = botMsg.id.value
+            logger.info("Displayed board for ${author.username}")
         }
-        botMsg.addReaction(Emojis.back.asReactionEmoji())
-        botMsg.addReaction(Emojis.check.asReactionEmoji())
-
-        botUser.activeMessageId = botMsg.id.value
-        logger.info("Displayed board for ${author.username}")
-    } else {
-        val botMsg = channel.getMessage(Snowflake(botUser.activeMessageId))
-        updateMessage(botMsg, botUser, desc)
-        logger.info("Updated Message for ${author.username}")
+        interaction != null -> {
+            val botMsg = channel.getMessage(Snowflake(botUser.activeMessageId))
+            updateMessage(botMsg, botUser, desc, interaction)
+            logger.info("Updated Message for ${author.username}")
+        }
+        else -> logger.warn("Either a ResponseBehaviour or a ComponentInteraction should be given. Neither is present")
     }
 
     saveUserData()

@@ -1,6 +1,9 @@
 package de.rubixdev.mastermind
 
-import de.rubixdev.mastermind.eventHandlers.*
+import de.rubixdev.mastermind.eventHandlers.handleGuildCreateEvent
+import de.rubixdev.mastermind.eventHandlers.handleGuildDeleteEvent
+import de.rubixdev.mastermind.eventHandlers.handleInteractionCreateEvent
+import de.rubixdev.mastermind.eventHandlers.handleReadyEvent
 import de.rubixdev.mastermind.userData.BotAuthor
 import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.Color
@@ -11,7 +14,6 @@ import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.guild.GuildDeleteEvent
 import dev.kord.core.event.interaction.InteractionCreateEvent
-import dev.kord.core.event.message.ReactionAddEvent
 import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.Intents
@@ -46,9 +48,6 @@ object Emojis {
     const val purple = "\ud83d\udfe3"
     const val brown = "\ud83d\udfe4"
     const val gray = "\u26ab"
-
-    const val back = "\u2b05\ufe0f"
-    const val check = "\u2705"
 }
 
 object Constants {
@@ -72,7 +71,7 @@ object Constants {
         Emojis.purple,
         Emojis.brown,
         Emojis.gray
-    ).map { it.asReactionEmoji() }
+    )
 }
 
 /**
@@ -82,15 +81,13 @@ object Constants {
 suspend fun main() {
     client = Kord(object {}.javaClass.getResource("/token.txt")!!.readText()) {
         intents = Intents(
-            Intent.Guilds,
-            Intent.GuildMessageReactions
+            Intent.Guilds
         )
     }
 
     Constants.botAuthor = BotAuthor(client.getUser(Snowflake(506069336247500811))!!)
 
     client.on<ReadyEvent> { handleReadyEvent() }
-    client.on<ReactionAddEvent> { handleReactionAddEvent() }
     client.on<GuildCreateEvent> { handleGuildCreateEvent() }
     client.on<GuildDeleteEvent> { handleGuildDeleteEvent() }
     client.on<InteractionCreateEvent> { handleInteractionCreateEvent() }
