@@ -12,6 +12,7 @@ import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.interaction.acknowledgePublicUpdateMessage
 import dev.kord.core.behavior.interaction.followUp
 import dev.kord.core.entity.User
+import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.entity.interaction.ComponentInteraction
 import dev.kord.rest.builder.interaction.embed
 import org.apache.logging.log4j.LogManager
@@ -20,7 +21,7 @@ import org.apache.logging.log4j.Logger
 private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
-suspend fun handleSubmitButtonPress(interaction: ComponentInteraction, botUser: BotUser) {
+suspend fun handleSubmitButtonPress(interaction: ButtonInteraction, botUser: BotUser) {
     if (botUser.nextMove.size != botUser.pins) {
         interaction.acknowledgePublicDeferredMessageUpdate()
         return
@@ -90,7 +91,7 @@ suspend fun handleSubmitButtonPress(interaction: ComponentInteraction, botUser: 
 
         saveUserData()
     } else {
-        // TODO: revert to interaction.user.asUser().username when next kord releases
+        // TODO: revert to interaction.user.asUser() when next kord releases
         showBoard(User(interaction.data.user.value!!, interaction.kord), message.getGuildOrNull(), message.getChannel(), interaction = interaction)
     }
 }

@@ -45,8 +45,17 @@ suspend fun displayGuilds(): String {
 
 suspend fun getOrCreateUser(id: Long): BotUser {
     return userData.find { it.id == id }
-        ?: BotUser(id, 0, 4, true, mutableListOf(), randomBoard())
-            .also { userData.add(it); updatePresence() }
+        ?: BotUser(
+            id = id,
+            activeMessageId = 0,
+            pins = 4,
+            allowMultiples = true,
+            nextMove = mutableListOf(),
+            board = randomBoard()
+        ).also {
+            userData.add(it)
+            updatePresence()
+        }
 }
 
 fun randomBoard(pins: Int = 4, allowMultiples: Boolean = true): Board {

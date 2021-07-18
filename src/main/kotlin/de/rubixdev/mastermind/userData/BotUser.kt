@@ -12,7 +12,7 @@ data class BotUser(
     var pins: Int,
     var allowMultiples: Boolean,
     val nextMove: MutableList<Int>,
-    var board: Board,
+    var board: Board
 ) {
     fun reset(username: String) {
         activeMessageId = 0

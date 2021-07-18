@@ -83,15 +83,15 @@ suspend fun showBoard(
                 for (pinButtonsSubList in pinButtons.chunked(chunkSize)) {
                     actionRow {
                         for ((pin, pinColor) in pinButtonsSubList) {
-                            interactionButton(ButtonStyle.Secondary, "$authorId-$pin") {
+                            interactionButton(ButtonStyle.Secondary, "$authorId-game_event-$pin") {
                                 emoji = DiscordPartialEmoji(name = pinColor)
                             }
                         }
                     }
                 }
                 actionRow {
-                    interactionButton(ButtonStyle.Danger, "$authorId-delete") { label = "Remove last pin" }
-                    interactionButton(ButtonStyle.Success, "$authorId-submit") { label = "Submit" }
+                    interactionButton(ButtonStyle.Danger, "$authorId-game_event-delete") { label = "Remove last pin" }
+                    interactionButton(ButtonStyle.Success, "$authorId-game_event-submit") { label = "Submit" }
                 }
             }.message
 
@@ -118,14 +118,6 @@ suspend fun updateMessage(
 ) {
     val prevEmbed = message.embeds.getOrNull(0) ?: run {
         logger.warn("No embed found on specified message")
-        message.edit {
-            embed {
-                title = "Error"
-                description = "The embed on the active message seems to be gone. " +
-                        "To continue playing use `/show` again."
-                color = Constants.errorColor
-            }
-        }
         return
     }
 

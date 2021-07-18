@@ -4,6 +4,7 @@ import de.rubixdev.mastermind.commands.updateMessage
 import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.entity.User
+import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.entity.interaction.ComponentInteraction
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -11,7 +12,7 @@ import org.apache.logging.log4j.Logger
 private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
-suspend fun handleDeleteButtonPress(interaction: ComponentInteraction, botUser: BotUser) {
+suspend fun handleDeleteButtonPress(interaction: ButtonInteraction, botUser: BotUser) {
     if (botUser.nextMove.isEmpty()) {
         interaction.acknowledgePublicDeferredMessageUpdate()
         return

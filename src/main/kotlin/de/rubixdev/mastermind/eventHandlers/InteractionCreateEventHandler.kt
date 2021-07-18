@@ -8,11 +8,18 @@ import de.rubixdev.mastermind.commands.*
 import de.rubixdev.mastermind.getOrCreateUser
 import de.rubixdev.mastermind.testCommandIds
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.ComponentType
 import dev.kord.common.entity.InteractionType
 import dev.kord.core.entity.User
+import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.entity.interaction.CommandInteraction
 import dev.kord.core.entity.interaction.ComponentInteraction
+import dev.kord.core.entity.interaction.SelectMenuInteraction
 import dev.kord.core.event.interaction.InteractionCreateEvent
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
+
+private val logger: Logger = LogManager.getLogger()
 
 @KordPreview
 suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
@@ -38,21 +45,40 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
         }
     } else {
         val componentInteraction = interaction as ComponentInteraction
+        val component = componentInteraction.component ?: kotlin.run {
+            logger.error("Illegal state: ComponentInteraction without public message")
+            return
+        }
+        val componentId = componentInteraction.componentId.split('-')
 
-        val buttonId = componentInteraction.componentId.split('-')
-        val authorId = buttonId[0].toLong()
+        val authorId = componentId[0].toLong()
         val botUser = getOrCreateUser(authorId)
-        if (authorId != User(componentInteraction.data.user.value!!, componentInteraction.kord).id.value
-            || botUser.activeMessageId != componentInteraction.message?.id?.value
-        ) {
+        // TODO: revert to interaction.user.asUser().id.value when next kord releases
+        if (authorId != User(componentInteraction.data.user.value!!, componentInteraction.kord).id.value) {
             componentInteraction.acknowledgePublicDeferredMessageUpdate()
             return
         }
 
-        when (buttonId[1]) {
-            "delete" -> handleDeleteButtonPress(componentInteraction, botUser)
-            "submit" -> handleSubmitButtonPress(componentInteraction, botUser)
-            else -> handlePinButtonPress(componentInteraction, botUser, buttonId[1].toInt())
+        when (componentId[1]) {
+            "config" -> {
+                val selectMenuInteraction = componentInteraction as SelectMenuInteraction
+                handleConfigInteraction(selectMenuInteraction, botUser, componentId[2])
+            }
+            "game_event" -> {
+                if (botUser.activeMessageId != componentInteraction.message?.id?.value) {
+                    componentInteraction.acknowledgePublicDeferredMessageUpdate()
+                    return
+                }
+
+                val buttonInteraction = componentInteraction as ButtonInteraction
+
+                when (componentId[2]) {
+                    "delete" -> handleDeleteButtonPress(buttonInteraction, botUser)
+                    "submit" -> handleSubmitButtonPress(buttonInteraction, botUser)
+                    else -> handlePinButtonPress(buttonInteraction, botUser, componentId[2].toInt())
+                }
+            }
+            else -> logger.error("Invalid component id: $componentId")
         }
     }
 }
