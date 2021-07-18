@@ -16,6 +16,8 @@ import dev.kord.core.entity.User
 import dev.kord.core.entity.channel.MessageChannel
 import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.entity.interaction.CommandInteraction
+import dev.kord.rest.builder.component.ActionRowBuilder
+import dev.kord.rest.builder.component.MessageComponentBuilder
 import dev.kord.rest.builder.interaction.actionRow
 import dev.kord.rest.builder.interaction.embed
 import dev.kord.rest.builder.message.EmbedBuilder
@@ -39,15 +41,56 @@ suspend fun showCommand(interaction: CommandInteraction) {
 private fun boardDisplayDescription(botUser: BotUser): String {
     return "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it] }} _\n" +
             "${
-                botUser.board.rows.reversed().joinToString("\n") { row ->
+                botUser.board.rows.reversed().joinToString("") { row ->
                     "${
                         row.gamePins.joinToString("") {
                             Constants.pinEmojis[it]
                         }
-                    }   ${Emojis.black * row.answerPins.black}${Emojis.white * row.answerPins.white}"
+                    }   ${Emojis.black * row.answerPins.black}${Emojis.white * row.answerPins.white}\n"
                 }
-            }\n\n" +
+            }\n" +
             "Use the buttons below to input your move and submit when done."
+}
+
+@KordPreview
+private fun boardDisplayButtons(botUser: BotUser): MutableList<MessageComponentBuilder> {
+    val components = mutableListOf<ActionRowBuilder.() -> Unit>()
+
+    val pinButtons = Constants.pinEmojis.subList(0, (botUser.pins - 1) * 2).mapIndexed { i, it -> i to it }
+    val chunkSize = when (pinButtons.size) {
+        6 -> 3
+        8 -> 4
+        else -> 5
+    }
+
+    for (pinButtonsSubList in pinButtons.chunked(chunkSize)) {
+        components.add {
+            for ((pin, pinColor) in pinButtonsSubList) {
+                interactionButton(ButtonStyle.Secondary, "${botUser.id}-game_event-$pin") {
+                    emoji = DiscordPartialEmoji(name = pinColor)
+                    disabled = !botUser.allowMultiples && pin in botUser.nextMove || botUser.nextMove.size == botUser.pins
+                }
+            }
+        }
+    }
+    components.add {
+        interactionButton(ButtonStyle.Danger, "${botUser.id}-game_event-delete") {
+            label = "Remove last pin"
+            disabled = botUser.nextMove.isEmpty()
+        }
+        interactionButton(ButtonStyle.Success, "${botUser.id}-game_event-submit") {
+            label = "Submit"
+            disabled = botUser.nextMove.size != botUser.pins
+        }
+    }
+
+    return components.map { ActionRowBuilder().apply(it) }.toMutableList()
+}
+
+@KordPreview
+private fun boardDisplayButtons(components: MutableList<MessageComponentBuilder>, botUser: BotUser) {
+    components.clear()
+    boardDisplayButtons(botUser).forEach { components.add(it) }
 }
 
 @KordPreview
@@ -94,6 +137,7 @@ suspend fun showBoard(
                     interactionButton(ButtonStyle.Danger, "$authorId-game_event-delete") { label = "Remove last pin" }
                     interactionButton(ButtonStyle.Success, "$authorId-game_event-submit") { label = "Submit" }
                 }
+                boardDisplayButtons(components, botUser)
             }.message
 
             botUser.activeMessageId = botMsg.id.value
@@ -142,10 +186,12 @@ suspend fun updateGameScreen(
     if (interaction != null) {
         interaction.acknowledgePublicUpdateMessage {
             embed(embed)
+            components = boardDisplayButtons(botUser)
         }
     } else {
         message.edit {
             embed(embed)
+            components = boardDisplayButtons(botUser)
         }
     }
 }
