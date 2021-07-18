@@ -1,5 +1,6 @@
 package de.rubixdev.mastermind.eventHandlers
 
+import de.rubixdev.mastermind.Constants
 import de.rubixdev.mastermind.buttonHandlers.handleDeleteButtonPress
 import de.rubixdev.mastermind.buttonHandlers.handlePinButtonPress
 import de.rubixdev.mastermind.buttonHandlers.handleSubmitButtonPress
@@ -8,14 +9,16 @@ import de.rubixdev.mastermind.commands.*
 import de.rubixdev.mastermind.getOrCreateUser
 import de.rubixdev.mastermind.testCommandIds
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.ComponentType
 import dev.kord.common.entity.InteractionType
+import dev.kord.core.behavior.interaction.acknowledgePublicUpdateMessage
+import dev.kord.core.behavior.interaction.followUp
 import dev.kord.core.entity.User
 import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.entity.interaction.CommandInteraction
 import dev.kord.core.entity.interaction.ComponentInteraction
 import dev.kord.core.entity.interaction.SelectMenuInteraction
 import dev.kord.core.event.interaction.InteractionCreateEvent
+import dev.kord.rest.builder.interaction.embed
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -45,10 +48,6 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
         }
     } else {
         val componentInteraction = interaction as ComponentInteraction
-        val component = componentInteraction.component ?: kotlin.run {
-            logger.error("Illegal state: ComponentInteraction without public message")
-            return
-        }
         val componentId = componentInteraction.componentId.split('-')
 
         val authorId = componentId[0].toLong()
@@ -66,11 +65,29 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
             }
             "game_event" -> {
                 if (botUser.activeMessageId != componentInteraction.message?.id?.value) {
-                    componentInteraction.acknowledgePublicDeferredMessageUpdate()
+                    componentInteraction.acknowledgePublicUpdateMessage {
+                        components = mutableListOf()
+                    }.followUp {
+                        embed {
+                            title = "Sorry"
+                            description = "This is not your active game screen anymore. " +
+                                    "If you can't find your active message, or you reset your data by changing a " +
+                                    "setting, you can request a new one with `/show`."
+                            color = Constants.errorColor
+                        }
+                    }
                     return
                 }
 
                 val buttonInteraction = componentInteraction as ButtonInteraction
+
+                updateGameScreen(
+                    buttonInteraction.message ?: run {
+                        logger.error("Illegal state: Button interaction has no public message associated with it")
+                        return
+                    },
+                    botUser
+                )
 
                 when (componentId[2]) {
                     "delete" -> handleDeleteButtonPress(buttonInteraction, botUser)

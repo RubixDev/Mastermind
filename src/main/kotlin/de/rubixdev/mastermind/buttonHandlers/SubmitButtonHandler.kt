@@ -2,6 +2,7 @@ package de.rubixdev.mastermind.buttonHandlers
 
 import de.rubixdev.mastermind.Constants
 import de.rubixdev.mastermind.commands.showBoard
+import de.rubixdev.mastermind.commands.updateGameScreen
 import de.rubixdev.mastermind.countIndexed
 import de.rubixdev.mastermind.rubixFooter
 import de.rubixdev.mastermind.saveUserData
@@ -13,7 +14,6 @@ import dev.kord.core.behavior.interaction.acknowledgePublicUpdateMessage
 import dev.kord.core.behavior.interaction.followUp
 import dev.kord.core.entity.User
 import dev.kord.core.entity.interaction.ButtonInteraction
-import dev.kord.core.entity.interaction.ComponentInteraction
 import dev.kord.rest.builder.interaction.embed
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -23,7 +23,7 @@ private val logger: Logger = LogManager.getLogger()
 @KordPreview
 suspend fun handleSubmitButtonPress(interaction: ButtonInteraction, botUser: BotUser) {
     if (botUser.nextMove.size != botUser.pins) {
-        interaction.acknowledgePublicDeferredMessageUpdate()
+        updateGameScreen(interaction, botUser)
         return
     }
 

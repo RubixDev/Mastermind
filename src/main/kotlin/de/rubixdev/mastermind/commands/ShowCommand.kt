@@ -14,8 +14,8 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.User
 import dev.kord.core.entity.channel.MessageChannel
+import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.entity.interaction.CommandInteraction
-import dev.kord.core.entity.interaction.ComponentInteraction
 import dev.kord.rest.builder.interaction.actionRow
 import dev.kord.rest.builder.interaction.embed
 import dev.kord.rest.builder.message.EmbedBuilder
@@ -36,13 +36,27 @@ suspend fun showCommand(interaction: CommandInteraction) {
     )
 }
 
+private fun boardDisplayDescription(botUser: BotUser): String {
+    return "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it] }} _\n" +
+            "${
+                botUser.board.rows.reversed().joinToString("\n") { row ->
+                    "${
+                        row.gamePins.joinToString("") {
+                            Constants.pinEmojis[it]
+                        }
+                    }   ${Emojis.black * row.answerPins.black}${Emojis.white * row.answerPins.white}"
+                }
+            }\n\n" +
+            "Use the buttons below to input your move and submit when done."
+}
+
 @KordPreview
 suspend fun showBoard(
     author: User,
     guild: Guild?,
     channel: MessageChannel,
     responseBehavior: PublicInteractionResponseBehavior? = null,
-    interaction: ComponentInteraction? = null
+    interaction: ButtonInteraction? = null
 ) {
     val authorId = author.id.value
     val botUser = getOrCreateUser(authorId)
@@ -50,20 +64,7 @@ suspend fun showBoard(
         botUser.board = randomBoard(botUser.pins, botUser.allowMultiples)
     }
 
-    var boardDisplay = ""
-    for (row in botUser.board.rows.reversed()) {
-        boardDisplay += "${
-            row.gamePins.joinToString("") { Constants.pinEmojis[it] }
-        }   ${
-            Emojis.black * row.answerPins.black
-        }${
-            Emojis.white * row.answerPins.white
-        }\n"
-    }
-
     val displayName = guild?.getMember(Snowflake(authorId))?.nickname ?: author.username
-    val desc = "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it] }} _\n$boardDisplay\n" +
-            "Use the buttons below to input your move and submit when done."
     val pinButtons = Constants.pinEmojis.subList(0, (botUser.pins - 1) * 2).mapIndexed { i, it -> i to it }
     val chunkSize = when (pinButtons.size) {
         6 -> 3
@@ -76,7 +77,7 @@ suspend fun showBoard(
             val botMsg = responseBehavior.followUp {
                 embed {
                     title = "Current board of $displayName"
-                    description = desc
+                    description = boardDisplayDescription(botUser)
                     color = Constants.themeColor
                     rubixFooter()
                 }
@@ -100,7 +101,7 @@ suspend fun showBoard(
         }
         interaction != null -> {
             val botMsg = channel.getMessage(Snowflake(botUser.activeMessageId))
-            updateMessage(botMsg, botUser, desc, interaction)
+            updateGameScreen(botMsg, botUser, true, interaction)
             logger.info("Updated Message for ${author.username}")
         }
         else -> logger.warn("Either a ResponseBehaviour or a ComponentInteraction should be given. Neither is present")
@@ -110,11 +111,11 @@ suspend fun showBoard(
 }
 
 @KordPreview
-suspend fun updateMessage(
+suspend fun updateGameScreen(
     message: Message,
     botUser: BotUser,
-    overrideDesc: String? = null,
-    interaction: ComponentInteraction? = null
+    fullUpdate: Boolean = false,
+    interaction: ButtonInteraction? = null
 ) {
     val prevEmbed = message.embeds.getOrNull(0) ?: run {
         logger.warn("No embed found on specified message")
@@ -123,10 +124,14 @@ suspend fun updateMessage(
 
     val embed: EmbedBuilder.() -> Unit = {
         title = prevEmbed.title
-        description = overrideDesc ?: prevEmbed.description?.replaceBefore(
-            "\n",
-            "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it] }} _"
-        )
+        description = if (fullUpdate) {
+            boardDisplayDescription(botUser)
+        } else {
+            prevEmbed.description?.replaceBefore(
+                "\n",
+                "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it] }} _"
+            )
+        }
         color = prevEmbed.color
         footer {
             text = prevEmbed.footer?.text ?: "Bot made by ${Constants.botAuthor.displayName}"
@@ -143,4 +148,17 @@ suspend fun updateMessage(
             embed(embed)
         }
     }
+}
+
+@KordPreview
+suspend fun updateGameScreen(interaction: ButtonInteraction, botUser: BotUser) {
+    updateGameScreen(
+        message = interaction.message ?: run {
+            logger.error("Illegal state: Button interaction has no public message associated with it")
+            return
+        },
+        botUser = botUser,
+        fullUpdate = true,
+        interaction = interaction
+    )
 }
