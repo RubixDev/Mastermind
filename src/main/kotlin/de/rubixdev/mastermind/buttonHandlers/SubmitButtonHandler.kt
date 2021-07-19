@@ -1,20 +1,17 @@
 package de.rubixdev.mastermind.buttonHandlers
 
-import de.rubixdev.mastermind.Constants
 import de.rubixdev.mastermind.commands.showBoard
 import de.rubixdev.mastermind.commands.updateGameScreen
 import de.rubixdev.mastermind.countIndexed
-import de.rubixdev.mastermind.rubixFooter
+import de.rubixdev.mastermind.eventHandlers.newGameButton
 import de.rubixdev.mastermind.saveUserData
 import de.rubixdev.mastermind.userData.AnswerPins
 import de.rubixdev.mastermind.userData.BoardRow
 import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
-import dev.kord.core.behavior.interaction.acknowledgePublicUpdateMessage
-import dev.kord.core.behavior.interaction.followUp
 import dev.kord.core.entity.User
 import dev.kord.core.entity.interaction.ButtonInteraction
-import dev.kord.rest.builder.interaction.embed
+import dev.kord.rest.builder.component.ActionRowBuilder
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -67,25 +64,19 @@ suspend fun handleSubmitButtonPress(interaction: ButtonInteraction, botUser: Bot
     }
 
     if (blackPins == botUser.pins) {
-        val responseBehaviour = interaction.acknowledgePublicUpdateMessage {
-            components = mutableListOf()
-        }
+        updateGameScreen(
+            message = message,
+            botUser = botUser,
+            fullUpdate = true,
+            interaction = interaction,
+            overrideComponents = mutableListOf(ActionRowBuilder().apply {
+                newGameButton(botUser.id)
+            })
+        )
         logger.info(
             "$username found the solution after ${botUser.board.rows.size} turns: " +
                     "(${botUser.board.solution.joinToString(")(")})"
         )
-        responseBehaviour.followUp {
-            embed {
-                title = "Congratulations!"
-                description = "You found the answer after ${botUser.board.rows.size} turns"
-                field {
-                    name = "The solution was"
-                    value = botUser.board.solution.joinToString("") { Constants.pinEmojis[it] }
-                }
-                color = Constants.themeColor
-                rubixFooter()
-            }
-        }
         botUser.board.isFinished = true
         botUser.activeMessageId = 0
 

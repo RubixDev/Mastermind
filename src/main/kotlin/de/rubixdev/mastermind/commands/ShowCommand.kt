@@ -39,17 +39,24 @@ suspend fun showCommand(interaction: CommandInteraction) {
 }
 
 private fun boardDisplayDescription(botUser: BotUser): String {
-    return "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it] }} _\n" +
-            "${
-                botUser.board.rows.reversed().joinToString("") { row ->
-                    "${
-                        row.gamePins.joinToString("") {
-                            Constants.pinEmojis[it]
-                        }
-                    }   ${Emojis.black * row.answerPins.black}${Emojis.white * row.answerPins.white}\n"
-                }
-            }\n" +
-            "Use the buttons below to input your move and submit when done."
+    val board = botUser.board.rows.reversed().joinToString("") { row ->
+        "${
+            row.gamePins.joinToString("") {
+                Constants.pinEmojis[it]
+            }
+        }   ${Emojis.black * row.answerPins.black}${Emojis.white * row.answerPins.white}\n"
+    }
+
+    return if (botUser.board.rows.lastOrNull()?.answerPins?.black == botUser.pins) {
+        "**Congratulations**\n" +
+                "You found the solution in ${botUser.board.rows.size} turns. Your board will stay visible below." +
+                "To start a new game use `/show` or the button below, or to change the difficulty use `/config`.\n\n" +
+                board
+    } else {
+        "_${botUser.nextMove.joinToString("") { Constants.pinEmojis[it] }} _\n" +
+                "$board\n" +
+                "Use the buttons below to input your move and submit when done."
+    }
 }
 
 @KordPreview
@@ -148,7 +155,7 @@ suspend fun showBoard(
             updateGameScreen(botMsg, botUser, true, interaction)
             logger.info("Updated Message for ${author.username}")
         }
-        else -> logger.warn("Either a ResponseBehaviour or a ComponentInteraction should be given. Neither is present")
+        else -> logger.warn("Either a ResponseBehavior or a ComponentInteraction should be given. Neither is present")
     }
 
     saveUserData()
@@ -159,7 +166,8 @@ suspend fun updateGameScreen(
     message: Message,
     botUser: BotUser,
     fullUpdate: Boolean = false,
-    interaction: ButtonInteraction? = null
+    interaction: ButtonInteraction? = null,
+    overrideComponents: MutableList<MessageComponentBuilder>? = null
 ) {
     val prevEmbed = message.embeds.getOrNull(0) ?: run {
         logger.warn("No embed found on specified message")
@@ -186,12 +194,12 @@ suspend fun updateGameScreen(
     if (interaction != null) {
         interaction.acknowledgePublicUpdateMessage {
             embed(embed)
-            components = boardDisplayButtons(botUser)
+            components = overrideComponents ?: boardDisplayButtons(botUser)
         }
     } else {
         message.edit {
             embed(embed)
-            components = boardDisplayButtons(botUser)
+            components = overrideComponents ?: boardDisplayButtons(botUser)
         }
     }
 }
