@@ -79,7 +79,7 @@ object Constants {
  */
 @KordPreview
 suspend fun main() {
-    client = Kord(object {}.javaClass.getResource("/devToken.txt")!!.readText()) {
+    client = Kord(object {}.javaClass.getResource("/token.txt")!!.readText()) {
         intents = Intents(
             Intent.Guilds
         )
