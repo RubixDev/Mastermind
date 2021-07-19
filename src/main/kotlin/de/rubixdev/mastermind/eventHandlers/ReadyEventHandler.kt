@@ -18,16 +18,19 @@ suspend fun ReadyEvent.handleReadyEvent() {
     logger.info("Bot currently on guilds:${displayGuilds()}")
 
     addCommands {
-        command("show", "Shows current board or starts a new game if previous one is finished") {}
-        command("newgame", "Cancels the current game and starts a new one") {}
-        command("rules", "Explains the game and commands") {}
-        command("invite", "Displays an invite link for this bot") {}
-        command("help", "Alias for /rules") {}
-        command("config", "Displays a config screen") {}
+        command("show", "Shows current board or starts a new game if previous one is finished")
+        command("newgame", "Cancels the current game and starts a new one")
+        command("rules", "Explains the game and commands")
+        command("invite", "Displays an invite link for this bot")
+        command("help", "Alias for /rules")
+        command("config", "Displays a config screen")
     }
 
     isReady = true
 }
+
+@KordPreview
+private fun ApplicationCommandsCreateBuilder.command(name: String, description: String) = command(name, description) {}
 
 @KordPreview
 private suspend fun ReadyEvent.addCommands(builder: ApplicationCommandsCreateBuilder.() -> Unit) {
@@ -36,7 +39,6 @@ private suspend fun ReadyEvent.addCommands(builder: ApplicationCommandsCreateBui
     addTestCommands(builder)
 }
 
-@Suppress("unused")
 @KordPreview
 private suspend fun ReadyEvent.addTestCommands(builder: ApplicationCommandsCreateBuilder.() -> Unit) {
     val commands = kord.getGuild(Snowflake(661936855167664148))!!.createApplicationCommands(builder)
