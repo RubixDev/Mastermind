@@ -18,6 +18,5 @@ One player (in this case the bot) thinks of a random combination of four pins. T
 - `/newgame` Starts a new game, cancelling the current one, if there is one.
 - `/rules` Shows a message explaining the game with an example
 - `/help` Alias for `/rules`
-- `/setpins <amount>` Sets the number of pins the game is played with. Is 4 by default and must be between 3 and 6.
-- `/allowmultiples <allow>` Allows or prevents multiple pins of the same color to exist in the solutions. Is on by default.
+- `/config` Displays a config screen to change the number of pins and whether to allow multiple pins of the same color.
 - `/invite` Displays an invite link for this bot

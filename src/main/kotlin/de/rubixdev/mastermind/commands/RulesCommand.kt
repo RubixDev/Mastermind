@@ -53,10 +53,8 @@ suspend fun rulesCommand(interaction: CommandInteraction) {
                         "if there is one.\n" +
                         "- `/rules` Shows this message.\n" +
                         "- `/help` Alias for `/rules`\n" +
-                        "- `/setpins <amount>` Sets the number of pins the game is played with. " +
-                        "Is 4 by default and must be between 3 and 6.\n" +
-                        "- `/allowmultiples <allow>` Allows or prevents multiple pins of the same color to exist in " +
-                        "the solutions. Is on by default.\n" +
+                        "- `/config` Displays a config screen to change the number of pins and whether to allow " +
+                        "multiple pins of the same color.\n" +
                         "- `/invite` Displays an invite link for this bot"
             }
             color = Constants.themeColor

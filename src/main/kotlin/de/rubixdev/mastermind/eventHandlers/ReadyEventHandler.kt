@@ -24,19 +24,6 @@ suspend fun ReadyEvent.handleReadyEvent() {
         command("invite", "Displays an invite link for this bot") {}
         command("help", "Alias for /rules") {}
         command("config", "Displays a config screen") {}
-        command("setpins", "Sets the amount of pins you want to play with") {
-            int("amount", "Amount of pins. Value between 3 and 6") {
-                required = true
-            }
-        }
-        command(
-            "allowmultiples",
-            "Allows having multiple pins of the same color in the solution. True by default"
-        ) {
-            boolean("allow", "True to enable, False to disable") {
-                required = true
-            }
-        }
     }
 
     isReady = true

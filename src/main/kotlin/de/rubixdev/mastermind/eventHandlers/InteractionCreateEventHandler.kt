@@ -33,14 +33,10 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
             commandIds["show"] -> showCommand(commandInteraction)
             testCommandIds["newgame"],
             commandIds["newgame"] -> newGameCommand(commandInteraction)
-            testCommandIds["setpins"],
-            commandIds["setpins"] -> setPinsCommand(commandInteraction)
             testCommandIds["rules"],
             commandIds["rules"],
             testCommandIds["help"],
             commandIds["help"] -> rulesCommand(commandInteraction)
-            testCommandIds["allowmultiples"],
-            commandIds["allowmultiples"] -> allowMultiplesCommand(commandInteraction)
             testCommandIds["invite"],
             commandIds["invite"] -> inviteCommand(commandInteraction)
             testCommandIds["config"],
