@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "de.rubixdev"
-version = "1.3"
+version = "1.3.1"
 
 repositories {
     mavenCentral()
@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
     // Kord
-    implementation("dev.kord:kord-core:0.7.3")
+    implementation("dev.kord:kord-core:0.7.4")
 
     // Logging
     implementation(platform("org.apache.logging.log4j:log4j-bom:2.14.1"))

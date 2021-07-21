@@ -10,7 +10,6 @@ import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.InteractionType
 import dev.kord.core.behavior.interaction.acknowledgePublicUpdateMessage
 import dev.kord.core.behavior.interaction.followUp
-import dev.kord.core.entity.User
 import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.entity.interaction.CommandInteraction
 import dev.kord.core.entity.interaction.ComponentInteraction
@@ -48,8 +47,7 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
 
         val authorId = componentId[0].toLong()
         val botUser = getOrCreateUser(authorId)
-        // TODO: revert to interaction.user.asUser().id.value when next kord releases
-        if (authorId != User(componentInteraction.data.user.value!!, componentInteraction.kord).id.value) {
+        if (authorId != interaction.user.asUser().id.value) {
             componentInteraction.acknowledgePublicDeferredMessageUpdate()
             return
         }
@@ -90,13 +88,11 @@ suspend fun InteractionCreateEvent.handleInteractionCreateEvent() {
                             }
                         }
 
-                        // TODO: revert to interaction.user.asUser().username when next kord releases
-                        botUser.reset(User(componentInteraction.data.user.value!!, componentInteraction.kord).username)
+                        botUser.reset(buttonInteraction.user.username)
                         showBoard(
-                            // TODO: revert to interaction.user.asUser() when next kord releases
-                            author = User(componentInteraction.data.user.value!!, componentInteraction.kord),
-                            guild = interaction.data.guildId.value?.let { client.getGuild(it) },
-                            channel = interaction.getChannel(),
+                            author = buttonInteraction.user,
+                            guild = buttonInteraction.data.guildId.value?.let { client.getGuild(it) },
+                            channel = buttonInteraction.getChannel(),
                             responseBehavior = responseBehavior
                         )
                     }

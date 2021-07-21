@@ -8,7 +8,6 @@ import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.interaction.acknowledgePublicUpdateMessage
 import dev.kord.core.behavior.interaction.respondPublic
-import dev.kord.core.entity.User
 import dev.kord.core.entity.interaction.CommandInteraction
 import dev.kord.core.entity.interaction.SelectMenuInteraction
 import dev.kord.rest.builder.component.ActionRowBuilder
@@ -72,8 +71,7 @@ private fun allowMultiplesSelectMenu(botUser: BotUser): ActionRowBuilder.() -> U
 
 @KordPreview
 suspend fun handleConfigInteraction(interaction: SelectMenuInteraction, botUser: BotUser, setting: String) {
-    // TODO: revert to interaction.user.asUser().username when next kord releases
-    val username = User(interaction.data.user.value!!, interaction.kord).username
+    val username = interaction.user.username
     botUser.reset(username)
 
     when (setting) {

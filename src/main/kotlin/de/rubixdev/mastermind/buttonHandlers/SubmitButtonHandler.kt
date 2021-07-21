@@ -9,7 +9,6 @@ import de.rubixdev.mastermind.userData.AnswerPins
 import de.rubixdev.mastermind.userData.BoardRow
 import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
-import dev.kord.core.entity.User
 import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.rest.builder.component.ActionRowBuilder
 import org.apache.logging.log4j.LogManager
@@ -52,8 +51,7 @@ suspend fun handleSubmitButtonPress(interaction: ButtonInteraction, botUser: Bot
     )
     botUser.nextMove.clear()
 
-    // TODO: revert to interaction.user.asUser().username when next kord releases
-    val username = User(interaction.data.user.value!!, interaction.kord).username
+    val username = interaction.user.username
     logger.info(
         "Processed move of ${username}: (${botUser.board.rows.last().gamePins.joinToString(")(")})"
     )
@@ -82,7 +80,6 @@ suspend fun handleSubmitButtonPress(interaction: ButtonInteraction, botUser: Bot
 
         saveUserData()
     } else {
-        // TODO: revert to interaction.user.asUser() when next kord releases
-        showBoard(User(interaction.data.user.value!!, interaction.kord), message.getGuildOrNull(), message.getChannel(), interaction = interaction)
+        showBoard(interaction.user, message.getGuildOrNull(), message.getChannel(), interaction = interaction)
     }
 }

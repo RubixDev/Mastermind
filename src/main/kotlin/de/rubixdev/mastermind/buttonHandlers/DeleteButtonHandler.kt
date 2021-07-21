@@ -3,7 +3,6 @@ package de.rubixdev.mastermind.buttonHandlers
 import de.rubixdev.mastermind.commands.updateGameScreen
 import de.rubixdev.mastermind.userData.BotUser
 import dev.kord.common.annotation.KordPreview
-import dev.kord.core.entity.User
 import dev.kord.core.entity.interaction.ButtonInteraction
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -26,7 +25,6 @@ suspend fun handleDeleteButtonPress(interaction: ButtonInteraction, botUser: Bot
         botUser,
         interaction = interaction
     )
-    // TODO: revert to interaction.user.asUser().username when next kord releases
-    val username = User(interaction.data.user.value!!, interaction.kord).username
+    val username = interaction.user.username
     logger.info("Removed the last pin of $username'${if (username.endsWith('s')) "" else "s"} next move")
 }
